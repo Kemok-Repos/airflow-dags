@@ -1,2 +1,2 @@
-# airflow-dags
-Repositorio con DAGs diseñados para airflow
+# DAGs para Apache Airflow
+Con el fin de manejar y facilitar el dessarrollo y puesta en producción de DAGs para Kemok, se utilizan los dags como un repositorio aparte en el cual se consolidan tambien otros proyectos y repositorios a traves de ```git submodules ```

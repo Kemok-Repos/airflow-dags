@@ -1,0 +1,18 @@
+[submodule "aquasistemas-sql"]
+	path = aquasistemas-sql
+	url = git@github.com:Kemok-Repos/aquasistemas_sql.git
+[submodule "bac-personas-sql"]
+	path = bac-personas-sql
+	url = git@github.com:Kemok-Repos/bac-personas-sql.git
+[submodule "sr-tendero-sql"]
+	path = sr-tendero-sql
+	url = git@github.com:Kemok-Repos/sr-tendero-bi-sql.git
+[submodule "bago-guatemala-sql"]
+	path = bago-guatemala-sql
+	url = git@github.com:Kemok-Repos/bago_guatemala_sql.git
+[submodule "bago-caricam-sql"]
+	path = bago-caricam-sql
+	url = git@github.com:Kemok-Repos/bago_caricam_sql.git
+[submodule "productos-senz"]
+	path = productos-senz
+	url = git@github.com:Kemok-Repos/productos-guatecompras.git
