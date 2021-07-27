@@ -19,15 +19,16 @@ default_args = {{
     'email_on_retry':   False,
     'retries': 2,
     'retry_delay': timedelta(seconds=30),
-    'sla': timedelta(minutes=10)    
+    'sla': timedelta(minutes=120)    
 }}
 with DAG(
   dag_id="transformacion-{0}",
   description="Transforma la informacion cruda para el uso de las aplicaciones",
   default_args=default_args,
   start_date=days_ago(1),
-#{3}
-  schedule_interval='{2}', #UTC
+#Proceso manual
+  schedule_interval=None, #UTC
+  max_active_runs=1,
   catchup=False,
   tags=['{0}','transformacion'],
 ) as dag:
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 
             name = k[:-4]
             conn = name.replace('-', '_')
-            file = HEADER.format(name, conn, horario, comentario)
+            file = HEADER.format(name, conn)
 
             tg = 1
             orden_tg = []

@@ -14,15 +14,16 @@ default_args = {
     'email_on_retry':   False,
     'retries': 2,
     'retry_delay': timedelta(seconds=30),
-    'sla': timedelta(minutes=10)    
+    'sla': timedelta(minutes=120)    
 }
 with DAG(
   dag_id="transformacion-aquasistemas",
   description="Transforma la informacion cruda para el uso de las aplicaciones",
   default_args=default_args,
   start_date=days_ago(1),
-#Proceso normal a las 5:00 AM
-  schedule_interval='0 7 * * *', #UTC
+#Proceso manual
+  schedule_interval=None, #UTC
+  max_active_runs=1,
   catchup=False,
   tags=['aquasistemas','transformacion'],
 ) as dag:
