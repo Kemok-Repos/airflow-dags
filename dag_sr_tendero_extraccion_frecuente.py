@@ -68,7 +68,7 @@ with DAG(
   description="Extrae la información necesaria para el reporte diario",
   default_args=default_args,
   start_date=days_ago(1),
-  schedule_interval='0,30 7-23 * * *',
+  schedule_interval='0,30 13-23,0-5 * * *',
   catchup=False,
   tags=['sr-tendero','extraccion'],
 ) as dag:
