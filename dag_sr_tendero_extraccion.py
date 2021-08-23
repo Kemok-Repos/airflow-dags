@@ -2,14 +2,19 @@ from airflow import DAG
 from airflow.utils.task_group import TaskGroup
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.telegram.operators.telegram import TelegramOperator
 from airflow.utils.edgemodifier import Label
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-from transfer_manager import get_transfer_list, manage_transfer
+from os import listdir, getcwd
+from transfer_manager import get_transfer_list, get_task_name, manage_transfer
 import pandas as pd
 
+CONN = 'sr_tendero_postgres'
+
+PATH = getcwd()
 
 ALERTA_FALLA_CLIENTE = """ALERTA: Error en la tranferencia de datos.\n
 https://airflow.kemok.io/graph?dag_id={{ dag.dag_id }}\n
@@ -64,7 +69,7 @@ with DAG(
 ) as dag:
 
     # Leer el listado de tareas de extracción
-    transfer_tasks = get_transfer_list('sr_tendero_postgres')
+    transfer_tasks = get_transfer_list(CONN)
 
     # Organizar las tareas de extracción en grupos de tareas paralelas
     transfer_task_groups = []
@@ -110,13 +115,39 @@ with DAG(
         telegram_conn_id='soporte2_telegram',
         text = ALERTA_FALLA_SOPORTE
     )
-    # t5 = TelegramOperator(
-    #     task_id = 'Notificar_errores_a_cliente',
-    #     telegram_conn_id='direccion_telegram',
-    #     text = ALERTA_FALLA_CLIENTE
-    # )
+    t5 = TelegramOperator(
+        task_id = 'Notificar_errores_a_cliente',
+        telegram_conn_id='direccion_telegram',
+        text = ALERTA_FALLA_CLIENTE
+    )
 
-    # t4 >> t5
-
-    t2 >> Label("Sin errores") >> t3
+    t4 >> t5
+    t2 >> Label("Sin errores") >> t3 
     t2 >> Label("Con errores") >> t4
+
+    # Leer el listado de tareas de transformación
+    processing_task_groups = listdir(PATH+'/dags/sr-tendero-sql/sql') 
+    processing_task_groups.sort()
+
+    tg2 = []
+    for i, group in enumerate(processing_task_groups):
+        with TaskGroup(group_id=group) as task_group:
+            t6 = []
+
+            processing_tasks = listdir(PATH+'/dags/sr-tendero-sql/sql/'+group)
+            processing_tasks.sort()
+
+            for j, task in enumerate(processing_tasks):
+                t6.append(PostgresOperator(
+                    task_id= get_task_name(task), 
+                    trigger_rule='none_failed_or_skipped',
+                    postgres_conn_id= CONN,
+                    sql='sr-tendero-sql/sql/'+group+'/'+task))
+                if j != 0:
+                    t6[j-1] >> t6[j]
+        tg2.append(task_group)
+        if i != 0:
+            tg2[i-1] >> tg2[i]
+
+    t3 >> tg2[0]
+    t5 >> tg2[0]

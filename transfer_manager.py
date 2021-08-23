@@ -26,6 +26,11 @@ def get_airflow_connection(connection):
         return LoadDB.built_connection_string(str(conn.login), str(conn.password), str(conn.host), str(conn.port),
                                               str(conn.schema))
 
+def get_task_name(x):
+    x = x.replace(" ", "_")
+    x = ''.join(e for e in x if e.isalpha() or e == '.' or e == '_' or e == '-' or e.isnumeric())
+    x = unidecode.unidecode(x)
+    return x
 
 def get_transfer_list(conn_id, query_path='/opt/airflow/dags/sql/transfer-query.sql', condition=''):
     """ Método para obtener el listado de extracción de un proyecto"""
@@ -60,18 +65,12 @@ def get_transfer_list(conn_id, query_path='/opt/airflow/dags/sql/transfer-query.
         for j, k in enumerate(i):
             config[names[j]] = k
         # Nombre de tarea
-        task_name = config['nombre']
-        task_name = task_name.replace(" ", "_")
-        task_name = ''.join(e for e in task_name if e.isalpha() or e == '.' or e == '_' or e == '-')
-        task_name = unidecode.unidecode(task_name)
+        task_name = get_task_name(config['nombre'])
         task_name = '{0}_{1}'.format(config['id'], task_name)
         config['task_name'] = task_name
 
         # Nombre de grupo de tareas
-        taskgroup_name = config['nombre_fuente']
-        taskgroup_name = taskgroup_name.replace(" ", "_")
-        taskgroup_name = ''.join(e for e in taskgroup_name if e.isalpha() or e == '.' or e == '_' or e == '-')
-        taskgroup_name = unidecode.unidecode(taskgroup_name)
+        taskgroup_name = get_task_name(config['nombre_fuente'])
         config['taskgroup_name'] = taskgroup_name
 
         transfer_list.append(config)
