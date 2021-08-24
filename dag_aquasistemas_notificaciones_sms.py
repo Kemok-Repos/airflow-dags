@@ -8,7 +8,7 @@ from datetime import timedelta
 
 def enviar_campanha():
     box = KontactClient('333c073e9f6511ea8c9b58fb844606cc')
-    res = box.send_campaign(campaign_id=2)
+    res = box.send_campaign(campaign_id=3)
     return res.json()
 
 
@@ -24,8 +24,8 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id='envio_de_correo_de_recordatorio_de_pago_aquasistemas',
-    description="Activación asincrona del envío de recordatorios y alertas de pago para Aquasistemas.",
+    dag_id='envio_de_sms_de_recordatorio_de_pago_aquasistemas',
+    description="Activación asincrona del envío de mensajes de texto para Aquasistemas.",
     default_args=default_args,
     schedule_interval=None,
     start_date=days_ago(1),
@@ -44,7 +44,7 @@ t1 = PythonOperator(
 t2 = TelegramOperator(
     task_id='notificacion_a_soporte',
     telegram_conn_id='soporte1_telegram',
-    text='NOTIF: Se activo el envío de campaña de correos para Aquasistemas.',
+    text='NOTIF: Se activo el envío de campaña de sms para Aquasistemas.',
     dag=dag
 )
 

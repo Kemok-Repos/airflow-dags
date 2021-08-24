@@ -59,7 +59,7 @@ default_args = {
     'sla': timedelta(minutes=5)
 }
 with DAG(
-  dag_id="extraccion-diaria-sr-tendero",
+  dag_id="extraccion_completa_sr_tendero",
   description="Extraer información del centro de mando",
   default_args=default_args,
   start_date=days_ago(1),
