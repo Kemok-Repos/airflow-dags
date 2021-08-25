@@ -1,57 +1,19 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.hooks.base_hook import BaseHook
+from airflow.utils.task_group import TaskGroup
+from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.providers.telegram.operators.telegram import TelegramOperator
+from airflow.utils.edgemodifier import Label
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta
-from kemokrw.extract_db import ExtractDB
-from kemokrw.load_db import LoadDB
-from kemokrw.transfer_basic import BasicTransfer
 from sqlalchemy import create_engine
+from os import listdir, getcwd
+from transfer_manager import build_transfer_tasks, check_transfer_tasks, build_processing_tasks, dev_key
 import pandas as pd
+import config
 
-con_string = "postgresql+psycopg2://{0}:{1}@{2}:{3}/{4}"
-conn = BaseHook.get_connection("sr_tendero_pos_postgres")
-DB1 = con_string.format(str(conn.login), str(conn.password), str(conn.host), str(conn.port), str(conn.schema))
-conn = BaseHook.get_connection("sr_tendero_postgres")
-DB2 = con_string.format(str(conn.login), str(conn.password), str(conn.host), str(conn.port), str(conn.schema))
-QUERY = """SELECT ordinal_position, column_name, data_type FROM information_schema.columns WHERE table_schema = 'public'     
-AND table_name = '{0}';"""
-
-tablas = ['store_turns', 'stock_movements', 'stock_movements_detail', 'sells']
-
-
-def get_model(db, table, include_columns=None, exclude_columns=None):
-    print(db)
-    model = dict()
-    engine = create_engine(db)
-    connection = engine.connect()
-    data = pd.read_sql(sql=QUERY.format(table), con=connection)
-    connection.close()
-    data.sort_values(['ordinal_position'], ascending=True, ignore_index=True, inplace=True)
-
-    if include_columns is not None and exclude_columns is None:
-        data = data[data['column_name'].isin(include_columns)]
-    elif include_columns is None and exclude_columns is not None:
-        data = data[~data['column_name'].isin(exclude_columns)]
-    elif include_columns is not None and exclude_columns is not None:
-        columns = [x for x in include_columns if x not in exclude_columns]
-        data = data[data['column_name'].isin(columns)]
-    data.reset_index(inplace=True, drop=True)
-    for index, row in data.iterrows():
-        model['col'+str(index+1)] = {'name': row['column_name'], 'type': row['data_type']}
-    return model
-
-
-def transfer_table(table):
-    print('Transfering {0} table to erp_pos_{0}'.format(table))
-    model1 = get_model(DB1, table)
-    model2 = get_model(DB2, 'erp_pos_'+table)
-    src = ExtractDB(DB1, table, model1)
-    dst = LoadDB(DB2, 'erp_pos_'+table, model2)
-    src.get_data()
-    trf = BasicTransfer(src, dst)
-    trf.transfer(2)
-
+CONN = 'sr_tendero_postgres'
 
 default_args = {
     'owner': 'airflow',
@@ -72,11 +34,34 @@ with DAG(
   catchup=False,
   tags=['sr-tendero','extraccion'],
 ) as dag:
-    t = []
-    for i, j in enumerate(tablas):
-        t.append(PythonOperator(
-            task_id='transfer_'+j,
-            python_callable=transfer_table,
-            op_kwargs={'table':j}))
-        if i != 0:
-            t[i-1] >> t[i]
+
+    tg1, task_log, task_log_names  = build_transfer_tasks(CONN, 'hourly')
+
+    # Revisión de errores durante la extracción
+    t2 = BranchPythonOperator(
+        task_id='Revision_de_errores',
+        trigger_rule='all_done',
+        python_callable=check_transfer_tasks,
+        op_kwargs={'tasks': task_log, 'names': task_log_names}
+    )
+    tg1 >> t2 
+
+    t3 = DummyOperator(
+        task_id = 'Sin_errores_de_transferencia'
+    )
+    t4 = TelegramOperator(
+        task_id = 'Notificar_errores_de_transferencia_a_soporte',
+        telegram_conn_id='soporte2_telegram',
+        chat_id=dev_key(),
+        text = config.ALERTA_FALLA_SOPORTE
+    )
+    t5 = TelegramOperator(
+        task_id = 'Notificar_errores_de_transferencia_a_cliente',
+        telegram_conn_id='direccion_telegram',
+        chat_id=dev_key(),
+        text = config.ALERTA_FALLA_CLIENTE
+    )
+
+    t4 >> t5
+    t2 >> Label("Sin errores") >> t3 
+    t2 >> Label("Con errores") >> t4

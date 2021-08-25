@@ -1,34 +1,18 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.python import BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.telegram.operators.telegram import TelegramOperator
 from airflow.utils.edgemodifier import Label
 from airflow.utils.dates import days_ago
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-from transfer_manager import get_transfer_list, manage_transfer
+from transfer_manager import build_transfer_tasks, check_transfer_tasks, build_processing_tasks
 import pandas as pd
+import config
 
+CONN = 'bago_guatemala_postgres'
 
-def branc_func(ti, tasks, names):
-    print(tasks)
-    errors = ti.xcom_pull(key='error', task_ids=tasks)
-    print(errors)
-    errors_to_notify = dict()
-    for i, j in enumerate(errors):
-        if j:
-            task = tasks[i]
-            name = names[i]
-            errors_to_notify[task] = {'error': j, 'name': name}
-    print(errors_to_notify)
-    if len(errors_to_notify) == 0:
-        return 'Sin_errores'
-    else:
-        error_message = ''
-        for i,j in enumerate(errors_to_notify):
-            error_message += '{0}). Error en {1}\n\n'.format(str(i), errors_to_notify[j]['name'])
-        ti.xcom_push(key='error_message', value=error_message)
-        return 'Notificar_errores'
+REPO = 'bago-guatemala-sql/sql/'
 
 default_args = {
     'owner': 'airflow',
@@ -41,7 +25,7 @@ default_args = {
     'sla': timedelta(minutes=5)
 }
 with DAG(
-  dag_id="extraccion-diaria-bago-guatemala",
+  dag_id="extraccion_completa_bago_guatemala",
   description="Extraer información del centro de mando",
   default_args=default_args,
   start_date=days_ago(1),
@@ -49,41 +33,47 @@ with DAG(
   catchup=False,
   tags=['bago-guatemala', 'extraccion'],
 ) as dag:
-    transfers = get_transfer_list('bago_guatemala_postgres')
-    t1 = []
-    tasks = []
-    task_names = []
-    for j in transfers:
-        t1.append(PythonOperator(
-            task_id=j['task_name'],
-            python_callable=manage_transfer,
-            op_kwargs={'clase_transfer': j['clase_transfer'],
-                        'clase_fuente': j['clase_fuente'],
-                        'config_fuente': j['config_fuente'],
-                        'clase_destino': j['clase_destino'],
-                        'config_destino': j['config_destino']}))
-        tasks.append(j['task_name'])
-        task_names.append(j['nombre'])
-    
+
+    tg1, task_log, task_log_names  = build_transfer_tasks(CONN, 'preprocessing')
+
+    # Revisión de errores durante la extracción
     t2 = BranchPythonOperator(
         task_id='Revision_de_errores',
         trigger_rule='all_done',
-        python_callable=branc_func,
-        op_kwargs={'tasks': tasks, 'names': task_names}
+        python_callable=check_transfer_tasks,
+        op_kwargs={'tasks': task_log, 'names': task_log_names}
     )
+    tg1 >> t2 
+
     t3 = DummyOperator(
-        task_id = 'Sin_errores'
+        task_id = 'Sin_errores_de_transferencia'
     )
     t4 = TelegramOperator(
-        task_id = 'Notificar_errores',
-        telegram_conn_id='direccion_telegram',
-        text = """ALERTA: Problemas en la tranferencia de datos.\n
-https://airflow.kemok.io/graph?dag_id={{ dag.dag_id }}\n
-\n
-{{ task_instance.xcom_pull(task_ids='Revision_de_errores', key='error_message') }}"""
+        task_id = 'Notificar_errores_de_transferencia_a_soporte',
+        telegram_conn_id='soporte2_telegram',
+        text = config.ALERTA_FALLA_SOPORTE
     )
-    
+    t5 = TelegramOperator(
+        task_id = 'Notificar_errores_de_transferencia_a_cliente',
+        telegram_conn_id='direccion_telegram',
+        text = config.ALERTA_FALLA_CLIENTE
+    )
 
-    t1 >> t2 
-    t2 >> Label("Sin errores") >> t3
+    t4 >> t5
+    t2 >> Label("Sin errores") >> t3 
     t2 >> Label("Con errores") >> t4
+
+    # Leer el listado de tareas de transformación
+    tg2 = build_processing_tasks(CONN, REPO)
+
+    t3 >> tg2[0]
+    t5 >> tg2[0]
+
+    t6 = TelegramOperator(
+    task_id = 'Notificar_errores_de_procesamiento_a_soporte',
+    telegram_conn_id='soporte2_telegram',
+    trigger_rule='all_failed',
+    text = config.ALERTA_FALLA
+    )
+
+    tg2 >> t6

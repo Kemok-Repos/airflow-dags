@@ -1,3 +1,9 @@
+from airflow.utils.task_group import TaskGroup
+from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.dummy import DummyOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.providers.telegram.operators.telegram import TelegramOperator
+from airflow.models import Variable
 from kemokrw.client_google import GoogleClient
 from kemokrw.client_hubstaff import HubstaffClient
 from kemokrw.client_teamwork import TeamworkClient
@@ -16,9 +22,17 @@ from kemokrw.transfer_basic import BasicTransfer
 #from kemokrw.transfer_db_key
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, DatabaseError
+from os import listdir, getcwd
 from airflow.hooks.base import BaseHook
 import unidecode
 
+PATH = getcwd()+'/dags/'
+
+def dev_key():
+    if bool(Variable.get("DEV")):
+        return '674350416'
+    else:
+        return None
 
 def get_airflow_connection(connection):
     if connection:
@@ -28,11 +42,11 @@ def get_airflow_connection(connection):
 
 def get_task_name(x):
     x = x.replace(" ", "_")
-    x = ''.join(e for e in x if e.isalpha() or e == '.' or e == '_' or e == '-' or e.isnumeric())
+    x = ''.join(e for e in x if e.isalpha() or e == '_' or e == '-' or e.isnumeric())
     x = unidecode.unidecode(x)
     return x
 
-def get_transfer_list(conn_id, query_path='/opt/airflow/dags/sql/transfer-query.sql', condition=''):
+def get_transfer_list(conn_id, query_path=PATH+'sql/transfer-query.sql', condition=''):
     """ Método para obtener el listado de extracción de un proyecto"""
     try:
         file = open(query_path, "r")
@@ -140,6 +154,112 @@ def manage_transfer(ti, clase_transfer, clase_fuente, config_fuente, clase_desti
         print(err)
         ti.xcom_push(key='error', value=str(err))
         raise err
+
+
+def revision_de_tareas_de_trasferencia(ti, tasks, names, branch_no='Sin_errores', branch_yes='Notificar_errores_a_soporte'):
+    # Leer los errores de cada una de las tareas de extracción
+    errors = ti.xcom_pull(key='error', task_ids=tasks)
+    mensaje_error_cliente = ''
+    mensaje_error_equipo = ''
+    n_errores = 0
+    for i, j in enumerate(errors):
+        if j:
+            mensaje_error_cliente += '{0}). Error en {1}\n\n'.format(str(i), names[i])
+            mensaje_error_equipo += '{0}). Error en {1}\n\ntask_id: {2}\nError:  {3}\n\n'.format(str(i), names[i], tasks[i], str(j))
+            n_errores += 1
+    # Escoge la proxima tarea si no hay errores
+    if n_errores == 0:
+        return branch_no
+
+    # Escoge la proxima tarea si hay errores
+    else:
+        ti.xcom_push(key='mensaje_error_cliente', value=mensaje_error_cliente)
+        ti.xcom_push(key='mensaje_error_equipo', value=mensaje_error_equipo)
+        return branch_yes
+
+def build_transfer_tasks(connection_id, condition=''):
+    if condition != '':
+        condition = "WHERE (maestro_de_transferencias.propiedades->>'{0}')::boolean".format(condition)
+    # Obtener listado de tareas de transferencia
+    transfer_tasks = get_transfer_list(connection_id, condition=condition)
+
+    # Obtener los grupos de tareas en base al origen
+    transfer_task_groups = []
+    for task in transfer_tasks:
+        transfer_task_groups.append(task['taskgroup_name'])
+    transfer_task_groups = set(transfer_task_groups)
+
+    # Crear un listado de grupos de tareas
+    task_log = []
+    task_log_names = []
+    tg = []
+    for group in transfer_task_groups:
+        with TaskGroup(group_id=group) as task_group:
+            # Crear un listado de tareas por cada grupo
+            t = []
+            for task in transfer_tasks:
+                if task['taskgroup_name'] == group:
+                    t.append(PythonOperator(
+                        task_id=task['task_name'],
+                        python_callable=manage_transfer,
+                        op_kwargs={'clase_transfer': task['clase_transfer'],
+                                    'clase_fuente': task['clase_fuente'],
+                                    'config_fuente': task['config_fuente'],
+                                    'clase_destino': task['clase_destino'],
+                                    'config_destino': task['config_destino']}))
+                    
+                    task_log.append(group+'.'+task['task_name'])
+                    task_log_names.append(task['nombre'])
+
+        tg.append(task_group)        
+    return tg, task_log, task_log_names
+
+def build_processing_tasks(connection_id, repo):
+    # Obetener listado de tareas de transformacion
+    processing_task_groups = listdir(PATH+repo)
+    processing_task_groups.sort()
+
+    tg = []
+    for i, group in enumerate(processing_task_groups):
+        with TaskGroup(group_id=group) as task_group:
+            t = []
+
+            processing_tasks = listdir(PATH+repo+'/'+group)
+            processing_tasks.sort()
+
+            for j, task in enumerate(processing_tasks):
+                t.append(PostgresOperator(
+                    task_id= get_task_name(task), 
+                    trigger_rule='none_failed_or_skipped',
+                    postgres_conn_id=connection_id,
+                    sql=repo+'/'+group+'/'+task))
+                if j != 0:
+                    t[j-1] >> t[j]
+        tg.append(task_group)
+        if i != 0:
+            tg[i-1] >> tg[i]
+    return tg
+
+def check_transfer_tasks(ti, tasks, names):
+    # Leer los errores de cada una de las tareas de extracción
+    errors = ti.xcom_pull(key='error', task_ids=tasks)
+    mensaje_error_cliente = ''
+    mensaje_error_equipo = ''
+    n_errores = 0
+    for i, j in enumerate(errors):
+        if j:
+            mensaje_error_cliente += '{0}). Error en {1}\n\n'.format(str(i), names[i])
+            mensaje_error_equipo += '{0}). Error en {1}\n\ntask_id: {2}\nError:  {3}\n\n'.format(str(i), names[i], tasks[i], str(j))
+            n_errores += 1
+    # Escoge la proxima tarea si no hay errores
+    if n_errores == 0:
+        return 'Sin_errores_de_transferencia'
+
+    # Escoge la proxima tarea si hay errores
+    else:
+        ti.xcom_push(key='mensaje_error_cliente', value=mensaje_error_cliente)
+        ti.xcom_push(key='mensaje_error_equipo', value=mensaje_error_equipo)
+        return 'Notificar_errores_de_transferencia_a_soporte'
 
 
 if __name__ == '__main__':
