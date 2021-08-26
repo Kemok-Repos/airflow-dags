@@ -1,9 +1,12 @@
-from airflow.utils.task_group import TaskGroup
+from airflow.hooks.base import BaseHook
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.telegram.operators.telegram import TelegramOperator
-from airflow.models import Variable
+from airflow.sensors.sql import SqlSensor
+from airflow.utils.edgemodifier import Label
+from airflow.utils.task_group import TaskGroup
 from kemokrw.client_google import GoogleClient
 from kemokrw.client_hubstaff import HubstaffClient
 from kemokrw.client_teamwork import TeamworkClient
@@ -23,28 +26,107 @@ from kemokrw.transfer_basic import BasicTransfer
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, DatabaseError
 from os import listdir, getcwd
-from airflow.hooks.base import BaseHook
+import config
+import re
 import unidecode
 
 PATH = getcwd()+'/dags/'
 
-def dev_key():
-    if bool(Variable.get("DEV")):
-        return '674350416'
+def app_environment():
+    try:
+        env = Variable.get('APP_ENV')
+    except KeyError:
+        env = 'development'
+    return
+
+def telegram_chat():
+    try:
+        chat_id = Variable.get('TELEGRAM_CHAT_ID')
+    except KeyError:
+        chat_id = None
+    if app_environment() == 'development' or app_environment() == 'testing':
+        return chat_id
     else:
         return None
 
 def get_airflow_connection(connection):
     if connection:
         conn = BaseHook.get_connection(connection)
-        return LoadDB.built_connection_string(str(conn.login), str(conn.password), str(conn.host), str(conn.port),
-                                              str(conn.schema))
+        if 'postgres' in connection:
+            return LoadDB.built_connection_string(str(conn.login), str(conn.password), str(conn.host), str(conn.port), str(conn.schema))
+        elif 'sqlserver' in connection:
+            return 'mssql+pymssql://{0}:{1}@{2}:{3}/{4}'.format(str(conn.login), str(conn.password), str(conn.host), str(conn.port), str(conn.schema))
 
 def get_task_name(x):
     x = x.replace(" ", "_")
     x = ''.join(e for e in x if e.isalpha() or e == '_' or e == '-' or e.isnumeric())
     x = unidecode.unidecode(x)
+    x = re.sub('^\d+_+','', x, count=1)
+    x = re.sub('^t[mtr]\d+_+','', x, count=1)
+    x = re.sub('^vm\d+_+','', x, count=1)
+    x = re.sub('sql$','', x, count=1)
     return x
+
+def get_current_runs(dag_id, conn_id='airflow_postgres', query=config.ACTIVE_DAG_RUNS):
+    db = get_airflow_connection(conn_id)
+    engine = create_engine(db)
+    attempts = 0
+    while attempts < 3:
+        try:
+            connection = engine.connect()
+            dag_runs_query = connection.execute(query.format(dag_id))
+            connection.close()
+            break
+        except OperationalError as err:
+            attempts += 1
+            if attempts == 3:
+                raise err
+        except DatabaseError as err:
+            attempts += 1
+            if attempts == 3:
+                raise err
+    dag_run_number = []
+    for i in dag_runs_query:
+        dag_run_number.append(i)
+    print(dag_run_number)
+    if dag_run_number[0][0] <= 2:
+        return 'Proceso_en_cola'
+    else:
+        return 'Cola_llena'
+
+def dag_init(dag_id, conn_id):
+
+    dag_init_tasks = []
+
+    dag_init_tasks.append(BranchPythonOperator(
+        task_id='Inicio',
+        python_callable=get_current_runs,
+        op_kwargs={'dag_id': dag_id}
+    ))
+
+    dag_init_tasks.append(SqlSensor(
+        task_id='Proceso_en_cola',
+        conn_id='sr_tendero_postgres',
+        sql='SELECT * FROM dag_run;',
+        fail_on_empty=True,
+        poke_interval=30,
+        task_concurrency=1
+    ))
+
+    dag_init_tasks.append(DummyOperator(task_id='Fin'))
+
+    dag_init_tasks.append(PostgresOperator(
+        task_id='Reservando_recursos', 
+        postgres_conn_id=conn_id,
+        sql='UPDATE dag_run SET available = False;'
+    ))
+
+    dag_init_tasks[0] >> Label("Por encolar") >> dag_init_tasks[1]
+    dag_init_tasks[0] >> Label("Cola llena") >> dag_init_tasks[2]
+
+    dag_init_tasks[1] >> dag_init_tasks[3]
+
+    return dag_init_tasks
 
 def get_transfer_list(conn_id, query_path=PATH+'sql/transfer-query.sql', condition=''):
     """ Método para obtener el listado de extracción de un proyecto"""
@@ -126,6 +208,8 @@ def manage_transfer(ti, clase_transfer, clase_fuente, config_fuente, clase_desti
             src = ExtractZoho(src_client, config_fuente.get('url'), config_fuente.get('endpoint'),
                               config_fuente.get('endpoint_type'), config_fuente.get('response_key'),
                               config_fuente.get('model'), config_fuente.get('params'), config_fuente.get('by_list'))
+        elif clase_fuente.lower() == 'eltools':
+            pass
         else:
             print(clase_fuente + ' no es una clase de fuente valida.')
 
@@ -138,6 +222,8 @@ def manage_transfer(ti, clase_transfer, clase_fuente, config_fuente, clase_desti
                          str(config_destino.get('condition') or ''), str(config_destino.get('order') or ''))
         elif clase_destino.lower() == 'loadfile':
             dst = LoadFile(config_destino.get('path'), config_destino.get('sheet'), config_destino.get('model'))
+        elif clase_destino.lower() == 'eltools':
+            pass
         else:
             print(transfer['clase_destino'] + ' no es una clase de destino valida.')
 
@@ -147,6 +233,8 @@ def manage_transfer(ti, clase_transfer, clase_fuente, config_fuente, clase_desti
         if clase_transfer.lower() == 'basictransfer':
             trf = BasicTransfer(src, dst)
             trf.transfer(2)
+        if clase_transfer.lower() == 'eltools':
+            pass
         else:
             print(clase_transfer + ' no es una clase de transferencia valida.')
 
@@ -212,6 +300,11 @@ def build_transfer_tasks(connection_id, condition=''):
                     task_log_names.append(task['nombre'])
 
         tg.append(task_group)        
+    if len(tg) == 0:
+        with TaskGroup(group_id='Extraer_informacion') as task_group:
+            t = DummyOperator(task_id = 'Sin_fuentes_a_transferir')
+        tg.append(task_group)
+
     return tg, task_log, task_log_names
 
 def build_processing_tasks(connection_id, repo):
@@ -221,7 +314,7 @@ def build_processing_tasks(connection_id, repo):
 
     tg = []
     for i, group in enumerate(processing_task_groups):
-        with TaskGroup(group_id=group) as task_group:
+        with TaskGroup(group_id='Procesar_'+get_task_name(group)) as task_group:
             t = []
 
             processing_tasks = listdir(PATH+repo+'/'+group)
@@ -263,13 +356,8 @@ def check_transfer_tasks(ti, tasks, names):
 
 
 if __name__ == '__main__':
-    transfers = get_transfer_list('sr_tendero_postgres')
-
-
-    for transfer in transfers:
-        print(transfer['task_name'])
-
-        result = manage_transfer(None, transfer['clase_transfer'], transfer['clase_fuente'], transfer['config_fuente'],
-                                 transfer['clase_destino'], transfer['config_destino'])
-
-        print(result)
+    try:
+        a = Variable.get('APP_ENV')
+    except KeyError:
+        a = 'development'
+    print(a)

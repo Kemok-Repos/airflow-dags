@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.telegram.operators.telegram import TelegramOperator
 from kontact.client import KontactClient
+from utils import telegram_chat
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 
@@ -44,6 +45,7 @@ t1 = PythonOperator(
 t2 = TelegramOperator(
     task_id='notificacion_a_soporte',
     telegram_conn_id='soporte1_telegram',
+    chat_id= telegram_chat(),
     text='NOTIF: Se activo el envío de campaña de correos para Aquasistemas.',
     dag=dag
 )
