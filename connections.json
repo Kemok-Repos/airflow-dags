@@ -1,0 +1,272 @@
+{
+  "airflow_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "postgres",
+    "login": "airflow",
+    "password": "airflow",
+    "schema": "airflow",
+    "port": 5432,
+    "extra": ""
+  },
+  "aquasistemas_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "172.105.156.208",
+    "login": "aquasis",
+    "password": "s44a133.56s!jjab1067FF",
+    "schema": "aquasistemas",
+    "port": 5432,
+    "extra": ""
+  },
+  "aquasistemas_sqlserver": {
+    "conn_type": "mssql",
+    "description": "",
+    "host": "190.113.88.111",
+    "login": "sa",
+    "password": "019@KuAit",
+    "schema": "SAE80Empre01",
+    "port": 65010,
+    "extra": ""
+  },
+  "aquasistemas_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "674350416",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "bac_personas_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "bacgt.cg9u5bhsoxjc.us-east-1.rds.amazonaws.com",
+    "login": "kemokadmin",
+    "password": "%H=#0Ov7tj#",
+    "schema": "bacgt",
+    "port": 5432,
+    "extra": ""
+  },
+  "bac_personas_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "674350416",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "bago_caricam_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "45.79.204.111",
+    "login": "bago",
+    "password": "1208af2802aee048ygg589462756050",
+    "schema": "bago_caricam",
+    "port": 5432,
+    "extra": ""
+  },
+  "bago_caricam_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "674350416",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "bago_guatemala_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "45.79.204.111",
+    "login": "bago",
+    "password": "1208af2802aee048ygg589462756050",
+    "schema": "bago",
+    "port": 5432,
+    "extra": ""
+  },
+  "bago_guatemala_sqlserver": {
+    "conn_type": "mssql",
+    "description": "",
+    "host": "srvbago.eastus.cloudapp.azure.com",
+    "login": "lgamez",
+    "password": "Sistemas2020$bago",
+    "schema": "SQLSAE7EMPRE02",
+    "port": 5833,
+    "extra": ""
+  },
+  "bago_guatemala_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "674350416",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "direccion_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "-444213208",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "hubstaff_token": {
+    "conn_type": "http",
+    "description": "",
+    "host": "",
+    "login": "",
+    "password": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImRlZmF1bHQifQ.eyJqdGkiOiJVRktKMC9GQSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudC5odWJzdGFmZi5jb20iLCJleHAiOjE2MzU4Njg3MDksImlhdCI6MTYyODA5MjcwOSwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCBodWJzdGFmZjpyZWFkIn0.mnR6CwVWVm1UPKyiwZ7JrJ0llqMwlzCqCs3y0bm-rPYuPmcObTZE2n6H6YjKiFFoM7SlV7f28bDPPFAVZ3vOQDmkPVYxAKRcObq0UoTTAmxHnWH4w664r_W3ks0WrSpQcLImAeQ0d68NndE6Z9ExlAFxq-iLbA4waPsVD4Pervn3KYdJ0b_uCjmvcprgCKSDWq98RYCFx4a3n8HhzbQeWurBQc9csTXHMfJ7TwK7LVBdbGKLNP8MLTKqFrFkOAR6VdiKp-TROyUKar0_gGdhUQYFRDEPCWMht5y-Fq4o-Smj3nQmRpA5ldNu9vT0_wt73QWMoorTzrzGJY9u7DENGA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "kemok_bi_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "45.56.117.5",
+    "login": "kemok_bi",
+    "password": "9214dbf05b71d25ae3e482c4b56eca3c",
+    "schema": "kemok_bi",
+    "port": 5432,
+    "extra": ""
+  },
+  "kemok_bi_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "674350416",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "kemok_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "kontact_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "66.228.48.216",
+    "login": "postgres",
+    "password": "wq355%FAbA$E512**?",
+    "schema": "kontact",
+    "port": 5432,
+    "extra": ""
+  },
+  "kontainer_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "45.33.3.6",
+    "login": "forge",
+    "password": "d4430a9402c2ea619dd3d28d89dfd7d5",
+    "schema": "kontainer",
+    "port": 5432,
+    "extra": ""
+  },
+  "producto_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "-478561111",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "senz_gt_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "45.56.113.157",
+    "login": "guatecompras",
+    "password": "a3cecf03255a7ca233567502fcc4a9b0",
+    "schema": "guatecompras",
+    "port": null,
+    "extra": ""
+  },
+  "senz_pa_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "50.116.33.86",
+    "login": "panamacompra",
+    "password": "58ebc01f794f9d4e104ed35cc80f32ed",
+    "schema": "panamacompra",
+    "port": 5432,
+    "extra": ""
+  },
+  "soporte1_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": " \t-552123225",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "sr_tendero_pos_postgres": {
+    "conn_type": "http",
+    "description": "",
+    "host": "194.195.218.250",
+    "login": "forge",
+    "password": "1kSbb31k1CZQmGScEaZc",
+    "schema": "srtendero_pos",
+    "port": 5432,
+    "extra": ""
+  },
+  "sr_tendero_postgres": {
+    "conn_type": "postgres",
+    "description": "",
+    "host": "45.79.216.118",
+    "login": "srtendero",
+    "password": "FFk39$.A210%",
+    "schema": "srtendero",
+    "port": 5432,
+    "extra": ""
+  },
+  "sr_tendero_sqlserver": {
+    "conn_type": "mssql",
+    "description": "",
+    "host": "75.126.22.38",
+    "login": "tiendasmass",
+    "password": "pades",
+    "schema": "DBH01",
+    "port": 1533,
+    "extra": ""
+  },
+  "sr_tendero_telegram": {
+    "conn_type": "http",
+    "description": "",
+    "host": "674350416",
+    "login": "",
+    "password": "1727391955:AAF0WeBdAjyg6OoRVWeGTj7c8BuzvxaZrxA",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  },
+  "teamwork_token": {
+    "conn_type": "http",
+    "description": "",
+    "host": "",
+    "login": "",
+    "password": "twp_3IMa8ceY3g82sfyxrLWf18rUJ8Sv",
+    "schema": "",
+    "port": null,
+    "extra": ""
+  }
+}

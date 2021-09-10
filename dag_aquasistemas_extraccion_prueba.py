@@ -1,16 +1,10 @@
 from airflow import DAG
-from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
-from airflow.providers.telegram.operators.telegram import TelegramOperator
-from airflow.utils.edgemodifier import Label
 from airflow.utils.dates import days_ago
-from datetime import datetime, timedelta
-from sqlalchemy import create_engine
-from utils import build_transfer_tasks, check_transfer_tasks, build_processing_tasks, telegram_chat
-import pandas as pd
-import config
+from core_transfer import build_transfer_tasks
 
-CONN = 'aquasistemas_postgres'
+cliente = 'aquasistemas'
+
+conn_id = cliente.replace(' ', '_')+'_postgres'
 
 default_args = {
     'owner': 'airflow',
@@ -18,18 +12,16 @@ default_args = {
     'email_on_sucess':  False,
     'email_on_failure': False,
     'email_on_retry':   False,
-    'retries': 0,
-    'retry_delay': timedelta(seconds=30),
-    'sla': timedelta(minutes=5)
+    'retries': 0
 }
 with DAG(
-  dag_id="extraccion_de_prueba_aquasistemas",
-  description="Prueba de extracción",
-  default_args=default_args,
-  start_date=days_ago(1),
-  schedule_interval=None,
-  catchup=False,
-  tags=['aquasistemas', 'extraccion'],
+    dag_id='extraccion_de_prueba_'+cliente.replace(' ', '_'),
+    description="Prueba de extracción",
+    default_args=default_args,
+    start_date=days_ago(1),
+    schedule_interval=None,
+    catchup=False,
+    tags=['transferencia', cliente],
 ) as dag:
 
-    tg1, task_log, task_log_names  = build_transfer_tasks(CONN, 'test')
+    t1 = build_transfer_tasks(conn_id, 'test')

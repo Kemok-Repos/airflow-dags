@@ -16,3 +16,6 @@
 [submodule "productos-senz"]
 	path = productos-senz
 	url = git@github.com:Kemok-Repos/productos-guatecompras.git
+[submodule "kemok-sql"]
+	path = kemok-sql
+	url = git@github.com:Kemok-Repos/kemok-sql.git

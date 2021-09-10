@@ -1,63 +1,42 @@
 from airflow import DAG
-from airflow.operators.python import BranchPythonOperator
-from airflow.operators.dummy import DummyOperator
-from airflow.providers.telegram.operators.telegram import TelegramOperator
-from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.utils.edgemodifier import Label
 from airflow.utils.dates import days_ago
-from datetime import datetime, timedelta
-from sqlalchemy import create_engine
-from utils import build_transfer_tasks, check_transfer_tasks, build_processing_tasks, telegram_chat, dag_init
-import pandas as pd
-import config
+from datetime import timedelta
+from core_initialize import dag_init
+from core_processing import build_processing_tasks
+from core_finale import dag_finale
 
-CONN = 'bago_caricam_postgres'
+cliente = 'bago caricam'
 
-REPO = 'bago-caricam-sql/sql/'
+conn_id = cliente.replace(' ', '_')+'_postgres'
+repo = cliente.replace(' ', '-')+'-sql/sql/'
 
 default_args = {
     'owner': 'airflow',
     'email': ['kevin@kemok.io'],
-    'email_on_sucess':  False,
+    'email_on_sucess': False,
     'email_on_failure': True,
-    'email_on_retry':   False,
+    'email_on_retry': False,
     'retries': 2,
     'retry_delay': timedelta(seconds=30),
-    'sla': timedelta(minutes=120)    
+    'sla': timedelta(minutes=120)
 }
 with DAG(
-  dag_id="transformacion_bago_caricam",
-  description="Transforma la informacion cruda para el uso de las aplicaciones",
-  default_args=default_args,
-  start_date=days_ago(1),
-  schedule_interval=None, #UTC
-  max_active_runs=1,
-  catchup=False,
-  tags=['bago-caricam','transformacion'],
+    dag_id='transformacion_'+cliente.replace(' ', '_'),
+    description="Transforma la informacion cruda para el uso de las aplicaciones",
+    default_args=default_args,
+    start_date=days_ago(1),
+    schedule_interval=None,
+    max_active_runs=1,
+    catchup=False,
+    tags=['procesamiento', cliente],
 ) as dag:
 
-    t1 = dag_init(dag.dag_id, CONN)
+    t1 = dag_init(conn_id)
 
-    # Leer el listado de tareas de transformación
-    tg1 = build_processing_tasks(CONN, REPO)
+    t2 = build_processing_tasks(conn_id, repo)
 
-    t1[-1] >> tg1[0]
+    t3 = dag_finale(conn_id, **{'dag_id': dag.dag_id})
 
-    t2 = PostgresOperator(
-        task_id='Liberando_recursos', 
-        postgres_conn_id=CONN,
-        trigger_rule='all_done',
-        sql='UPDATE dag_run SET available = True;'
-    )
-
-    tg1[-1] >> t2
-
-    t3 = TelegramOperator(
-        task_id = 'Notificar_errores_de_procesamiento_a_soporte',
-        telegram_conn_id='soporte2_telegram',
-        chat_id= telegram_chat(),
-        trigger_rule='all_failed',
-        text = config.ALERTA_FALLA
-    )
-
-    t2 >> t3
+    t1 >> t2[0] 
+    
+    t2[-1] >> t3

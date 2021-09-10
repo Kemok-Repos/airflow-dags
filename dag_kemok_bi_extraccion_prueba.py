@@ -1,9 +1,8 @@
 from airflow import DAG
 from airflow.utils.dates import days_ago
-from datetime import timedelta
 from core_transfer import build_transfer_tasks
 
-cliente = 'bago guatemala'
+cliente = 'kemok_bi'
 
 conn_id = cliente.replace(' ', '_')+'_postgres'
 
