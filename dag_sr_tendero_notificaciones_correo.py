@@ -1,5 +1,5 @@
 from airflow import DAG
-from core_notifications import message_tasks
+from core_notifications import NotificationTasks
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 
@@ -26,4 +26,5 @@ with DAG(
     tags=['sr tendero', 'comunicación', 'kontact'],
 ) as dag:
 
-    t1 = message_tasks(5, conn_id)
+    nt1 = NotificationTasks(conn_id=conn_id)
+    t1 = nt1.tasks(5)

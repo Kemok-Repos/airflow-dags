@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/aquasistemas-sql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/bac-personas-sql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/bago-caricam-sql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/bago-guatemala-sql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/kemok-sql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/productos-senz" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/sr-tendero-sql" vcs="Git" />
+  </component>
+</project>

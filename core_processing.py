@@ -6,7 +6,10 @@ from os import getcwd, listdir
 PATH = getcwd() + '/dags/'
 
 
-def build_processing_tasks(connection_id, repo):
+def build_processing_tasks(connection_id=None, repo=None, client=None):
+    if not repo and not connection_id and client:
+        connection_id = client.replace(' ', '_').lower()+'_postgres'
+        repo = client.replace(' ', '-').lower()+'-sql/sql/'
     # Obtener listado de tareas de transformacion
     processing_task_groups = listdir(PATH + repo)
     processing_task_groups.sort()

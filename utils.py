@@ -6,7 +6,7 @@ from kemokrw.load_db import LoadDB
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, DatabaseError
 from os import listdir, getcwd
-import config
+import json
 import re
 import unidecode
 
@@ -97,7 +97,9 @@ def get_params_from_query(conn_id, query):
         result = result.fetchone()
         if result:
             result = result[0]
-    except Exception:
+    except Exception as err:
+        print(err)
+        print('ERROR - No se pudo correr el query de obtención de parametros.')
         result = dict()
     result = result or dict()
     if type(result) is dict:
@@ -105,54 +107,52 @@ def get_params_from_query(conn_id, query):
     else:
         return dict()
 
+def get_task_from_file(url):
+    if os.path.isfile(url):
+        with open(url, 'r', encoding='utf-8') as task_file:
+            task_dictionary = json.load(task_file)
+            task_file.close()
+    else:
+        task_dictionary = dict()
+    task_list = task_dictionary.get('tasks')
+    if task_list and task_list is list:
+        return task_list 
+    else:
+        return None
+    
 
 def insert_error_to_log(context):
     """ Función que inserta errores dentro del log para su notificación. """
     dag_object = context.get('dag')
     ti = context.get('ti')
-    conn_id = ti.xcom_pull(key='conn_id', task_ids='Inicio.Configurar_corrida')
+    conn_id = ti.xcom_pull(key='conn_id', task_ids='Inicio.Revision_de_recursos.Configurar_corrida')
     params = {'dag_id': dag_object.dag_id, 'task_id': ti.task_id}
-    run_query_from_file(conn_id, PATH + '/sql/0_insercion_de_error.sql', **params)
+    run_query_from_file(conn_id, PATH + '/sql/_insert_error_to_log.sql', **params)
 
 
-def revision_inactividad(conn_id, query_path='/opt/airflow/dags/sql/revision_inactividad.sql'):
-    """ Método para obtener la inactividad a notificar"""
-    try:
-        file = open(query_path, "r")
-        query = file.read()
-    except FileNotFoundError as err:
-        print('No se encuentra el archivo de query.')
-        raise err
+def check_slow_queries():
+    connection_list = ["aquasistemas_postgres", "bac_personas_postgres", "bago_caricam_postgres", "bago_guatemala_postgres", "kemok_bi_postgres", "sr_tendero_postgres"]
+    for conn_id in connection_list:
+        result = run_query_from_file(conn_id, PATH+'sql/_slow_queries.sql')
+        pid_list = []
+        for slow_query in result:
+            pid_list.append(slow_query[0])
+        for pid in pid_list:
+            print('Eliminar proceso '+str(pid))
+            cancel = run_query(conn_id, "SELECT pg_cancel_backend('{0}')".format(str(pid)))
+            for i in cancel:
+                print(i[0])
 
-    db = get_airflow_connection(conn_id)
-    engine = create_engine(db)
-    attempts = 0
-    while attempts < 3:
-        try:
-            connection = engine.connect()
-            executed_query = connection.execute(query)
-            connection.close()
-            break
-        except OperationalError as err:
-            attempts += 1
-            if attempts == 3:
-                raise err
-        except DatabaseError as err:
-            attempts += 1
-            if attempts == 3:
-                raise err
-    notif_tasks = []
-    for i, j in enumerate(executed_query):
-        mensaje = 'Alerta: {0} ha tenido {1} minutos de inactividad. Desde {2} hasta {3}'.format(str(j[0]), str(j[1]),
-                                                                                                 str(j[2]), str(j[3]))
-        notif_tasks.append(TelegramOperator(
-            task_id='Alerta_{0}_{1}'.format(str(i), get_task_name(str(j[0]))),
-            telegram_conn_id='direccion_telegram',
-            text=mensaje
-        ))
-    if len(notif_tasks) == 0:
-        notif_tasks.append(DummyOperator(task_id='Sin_alertas_de_inactividad'))
-    return notif_tasks
+
+def join_dicts(a, b):
+    if not isinstance(a, dict):
+        a = dict()
+    if not isinstance(b, dict):
+        b = dict()
+    a = a or dict()
+    b = b or dict()
+    return {**a, **b}
+
 
 if __name__ == '__main__':
     pass

@@ -2,14 +2,11 @@ from airflow import DAG
 from airflow.utils.dates import days_ago
 from datetime import timedelta
 from core_initialize import dag_init
-from core_transfer import build_transfer_tasks
+from core_transfer import TransferTasks
 from core_processing import build_processing_tasks
 from core_finale import dag_finale
 
 cliente = 'sr tendero'
-
-conn_id = cliente.replace(' ', '_')+'_postgres'
-repo = cliente.replace(' ', '-')+'-sql/sql/'
 
 default_args = {
     'owner': 'airflow',
@@ -31,14 +28,10 @@ with DAG(
     catchup=False,
     tags=['transferencia', 'procesamiento', cliente],
 ) as dag:
-    t1 = dag_init(conn_id)
 
-    t2 = build_transfer_tasks(conn_id, 'preprocessing')
-
-    t3 = build_processing_tasks(conn_id, repo)
-
-    t4 = dag_finale(conn_id, **{'dag_id': dag.dag_id})
-
+    t1 = dag_init(client=cliente)
+    t2 = TransferTasks(client=cliente, condition='preprocessing').task_groups()
+    t3 = build_processing_tasks(client=cliente)
+    t4 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
     t1 >> t2 >> t3[0] 
-    
     t3[-1] >> t4

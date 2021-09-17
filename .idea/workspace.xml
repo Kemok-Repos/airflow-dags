@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b34ea1ba-130d-46d7-8625-25646dd4b46c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/bac-personas-sql" beforeDir="false" afterPath="$PROJECT_DIR$/bac-personas-sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bago-guatemala-sql" beforeDir="false" afterPath="$PROJECT_DIR$/bago-guatemala-sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bago-guatemala-sql/sql/1_tablas_transaccionales/tt023_transacciones_de_venta_insert_ventas_de_farmatodo.sql" beforeDir="false" afterPath="$PROJECT_DIR$/bago-guatemala-sql/sql/1_tablas_transaccionales/tt023_transacciones_de_venta_insert_ventas_de_farmatodo.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/connections.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/core_notifications.py" beforeDir="false" afterPath="$PROJECT_DIR$/core_notifications.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kemok-sql" beforeDir="false" afterPath="$PROJECT_DIR$/kemok-sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kemok-sql/vista materializada vista_inactividad_reciente.sql" beforeDir="false" afterPath="$PROJECT_DIR$/kemok-sql/vista materializada vista_inactividad_reciente.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prueba_kemok_bi.py" beforeDir="false" afterPath="$PROJECT_DIR$/prueba_kemok_bi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sr-tendero-sql" beforeDir="false" afterPath="$PROJECT_DIR$/sr-tendero-sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1yBGQSis43LdmmPO12selK0hu27" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b34ea1ba-130d-46d7-8625-25646dd4b46c" name="Changes" comment="" />
+      <created>1631717556860</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1631717556860</updated>
+    </task>
+    <servers />
+  </component>
+</project>

@@ -7,7 +7,6 @@ from airflow.utils.dates import days_ago
 from datetime import timedelta
 from utils import insert_error_to_log
 from core_initialize import dag_init
-from core_transfer import get_transfer_list, manage_transfer
 from core_finale import dag_finale
 from pprint import pprint
 
@@ -15,8 +14,8 @@ cliente = 'kemok_bi'
 conn_id = cliente.replace(' ', '_')+'_postgres'
 
 def failure_func():
-    # raise AirflowException()
-    print('Holi')
+    raise AirflowException()
+    # print('Holi')
 
 default_args = {
     'owner': 'airflow'

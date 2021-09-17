@@ -25,8 +25,11 @@ def push_configuration(ti, conn_id):
     ti.xcom_push(key='conn_id', value=conn_id)
 
 
-def dag_init(conn_id):
+def dag_init(conn_id=None, client=None):
     """ Función que devuelve una cola para asegurar una solo corrida del DAG a la vez. """
+    if client:
+        client = client.replace(' ', '_').lower()
+        conn_id = client+'_postgres'
     with TaskGroup(group_id='Inicio') as tg1:
         with TaskGroup(group_id='Revision_de_recursos') as tg2:
             dag_init_tasks = [BranchPythonOperator(
