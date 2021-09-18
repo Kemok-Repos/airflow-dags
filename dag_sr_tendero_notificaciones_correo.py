@@ -4,7 +4,6 @@ from airflow.utils.dates import days_ago
 from datetime import timedelta
 
 cliente = 'sr tendero'
-conn_id = cliente.replace(' ', '_')+'_postgres'
 
 default_args = {
     'owner': 'airflow',
@@ -26,5 +25,4 @@ with DAG(
     tags=['sr tendero', 'comunicación', 'kontact'],
 ) as dag:
 
-    nt1 = NotificationTasks(conn_id=conn_id)
-    t1 = nt1.tasks(5)
+    t1 = NotificationTasks(client=cliente).tasks(5)

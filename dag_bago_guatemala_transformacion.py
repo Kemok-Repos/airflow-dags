@@ -7,9 +7,6 @@ from core_finale import dag_finale
 
 cliente = 'bago guatemala'
 
-conn_id = cliente.replace(' ', '_')+'_postgres'
-repo = cliente.replace(' ', '-')+'-sql/sql/'
-
 default_args = {
     'owner': 'airflow',
     'email': ['kevin@kemok.io'],
@@ -31,12 +28,8 @@ with DAG(
     tags=['procesamiento', cliente],
 ) as dag:
 
-    t1 = dag_init(conn_id)
-
-    t2 = build_processing_tasks(conn_id, repo)
-
-    t3 = dag_finale(conn_id, **{'dag_id': dag.dag_id})
-
+    t1 = dag_init(client=cliente)
+    t2 = build_processing_tasks(client=cliente)
+    t3 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
     t1 >> t2[0] 
-    
     t2[-1] >> t3

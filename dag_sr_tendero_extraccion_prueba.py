@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from datetime import timedelta
-from core_transfer import build_transfer_tasks
+from core_transfer import TransferTasks
 
 cliente = 'sr tendero'
 
@@ -25,4 +25,4 @@ with DAG(
     tags=['transferencia', cliente],
 ) as dag:
 
-    t1 = build_transfer_tasks(conn_id, 'test')
+    t1 = TransferTasks(client=cliente, condition='test').task_groups()

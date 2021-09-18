@@ -1,11 +1,9 @@
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from datetime import timedelta
-from core_transfer import build_transfer_tasks
+from core_transfer import TransferTasks
 
 cliente = 'sr tendero'
-
-conn_id = cliente.replace(' ', '_')+'_postgres'
 
 default_args = {
     'owner': 'airflow',
@@ -27,7 +25,7 @@ with DAG(
     tags=['transferencia', cliente],
 ) as dag:
 
-    t1 = build_transfer_tasks(conn_id, 'hourly')
+    t1 = TransferTasks(client=cliente, condition='hourly').task_groups()
 
 
 

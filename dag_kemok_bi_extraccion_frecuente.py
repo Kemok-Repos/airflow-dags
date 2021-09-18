@@ -3,7 +3,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago
 from datetime import timedelta
-from core_transfer import build_transfer_tasks
+from core_transfer import TransferTasks
 from core_notifications import NotificationTasks
 
 cliente = 'kemok bi'
@@ -29,7 +29,7 @@ with DAG(
         tags=['transferencia', 'procesamiento', cliente],
 ) as dag:
 
-    t1 = build_transfer_tasks(conn_id, 'hourly')
+    t1 = TransferTasks(client=cliente, condition='hourly').task_groups()
 
     t2 = PostgresOperator(
             task_id='revision_de_inactividad',
