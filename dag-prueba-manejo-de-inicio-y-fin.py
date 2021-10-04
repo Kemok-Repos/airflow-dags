@@ -1,14 +1,9 @@
 from airflow import DAG
-from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import PythonOperator
-from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.utils.task_group import TaskGroup
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 from utils import insert_error_to_log
 from core_initialize import dag_init
 from core_finale import dag_finale
-from pprint import pprint
 
 cliente = 'kemok_bi'
 conn_id = cliente.replace(' ', '_')+'_postgres'
@@ -21,10 +16,10 @@ default_args = {
     'owner': 'airflow'
 }
 with DAG(
-        dag_id='prueba_'+cliente.replace(' ', '_'),
+        dag_id='prueba-manejo-de-inicio-y-fin',
         description="Prueba de extracción",
         default_args=default_args,
-        start_date=days_ago(1),
+        start_date=datetime(2021, 1, 1),
         schedule_interval=None,
         catchup=False,
         tags=['transferencia', cliente]

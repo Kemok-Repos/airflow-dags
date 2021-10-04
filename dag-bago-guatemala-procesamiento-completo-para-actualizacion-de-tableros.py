@@ -1,11 +1,10 @@
 from airflow import DAG
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 from core_initialize import dag_init
 from core_processing import build_processing_tasks
 from core_finale import dag_finale
 
-cliente = 'sr tendero'
+cliente = 'bago guatemala'
 
 default_args = {
     'owner': 'airflow',
@@ -18,10 +17,10 @@ default_args = {
     'sla': timedelta(minutes=120)
 }
 with DAG(
-    dag_id="transformacion-sr-tendero",
+    dag_id=cliente.replace(' ', '-')+'-procesamiento-completo-para-actualizacion-de-tableros',
     description="Transforma la informacion cruda para el uso de las aplicaciones",
     default_args=default_args,
-    start_date=days_ago(1),
+    start_date=datetime(2021, 1, 1),
     schedule_interval=None,
     max_active_runs=1,
     catchup=False,

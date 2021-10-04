@@ -1,8 +1,7 @@
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.dummy import DummyOperator
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 from core_transfer import TransferTasks
 from core_notifications import NotificationTasks
 
@@ -20,10 +19,10 @@ default_args = {
     'retry_delay': timedelta(seconds=30)
 }
 with DAG(
-        dag_id='extraccion_constante_'+cliente.replace(' ', '_'),
+        dag_id=cliente.replace(' ', '-')+'-extraccion-procesamiento-y-notificacion-por-telgram-cada-diez-minutos-de-inactividad-en-hubstaff',
         description="Extraer información y procesarla",
         default_args=default_args,
-        start_date=days_ago(1),
+        start_date=datetime(2021, 1, 1),
         schedule_interval='3,13,23,33,43,53 13-23,0-5 * * *',
         catchup=False,
         tags=['transferencia', 'procesamiento', cliente],

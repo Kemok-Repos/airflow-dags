@@ -1,7 +1,6 @@
 from airflow import DAG
 from core_notifications import NotificationTasks
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 cliente = 'sr tendero'
 
@@ -15,11 +14,11 @@ default_args = {
     'sla': timedelta(minutes=10)
 }
 with DAG(
-    dag_id='envio_de_estadisticas_proyecciones_de_compra_sr_tendero',
+    dag_id=cliente.replace(' ', '-')+'-notificacion-por-correo-de-proyecciones-de-compra',
     description="Envio de estadisticas de stock de Sr. Tendero.",
     default_args=default_args,
     schedule_interval='0 13 * * *',
-    start_date=days_ago(1),
+    start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
     tags=['sr tendero', 'comunicación', 'kontact'],

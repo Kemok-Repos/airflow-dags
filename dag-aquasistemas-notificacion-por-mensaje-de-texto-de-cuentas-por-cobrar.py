@@ -1,7 +1,6 @@
 from airflow import DAG
 from core_notifications import NotificationTasks
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 cliente = 'aquasistemas'
 conn_id = cliente.replace(' ', '_')+'_postgres'
@@ -15,15 +14,15 @@ default_args = {
 }
 
 with DAG(
-    dag_id='envio_de_correo_de_recordatorio_de_pago_aquasistemas',
-    description="Activación asincrona del envío de recordatorios y alertas de pago para Aquasistemas.",
+    dag_id=cliente.replace(' ', '-')+'-notificacion-por-mensaje-de-texto-de-cuentas-por-cobrar',
+    description="Activación asincrona del envío de mensajes de texto para Aquasistemas.",
     default_args=default_args,
     schedule_interval=None,
-    start_date=days_ago(1),
+    start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
     tags=['aquasistemas', 'comunicación', 'kontact'],
 ) as DAG:
 
     nt1 = NotificationTasks(conn_id=conn_id)
-    t1 = nt1.tasks(5)
+    t1 = nt1.tasks(6)

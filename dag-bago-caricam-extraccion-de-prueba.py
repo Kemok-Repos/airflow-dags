@@ -1,8 +1,8 @@
 from airflow import DAG
-from airflow.utils.dates import days_ago
+from datetime import datetime
 from core_transfer import TransferTasks
 
-cliente = 'aquasistemas'
+cliente = 'bago caricam'
 
 default_args = {
     'owner': 'airflow',
@@ -13,10 +13,10 @@ default_args = {
     'retries': 0
 }
 with DAG(
-    dag_id='extraccion_de_prueba_'+cliente.replace(' ', '_'),
+    dag_id=cliente.replace(' ', '-')+'-extraccion-de-prueba',
     description="Prueba de extracción",
     default_args=default_args,
-    start_date=days_ago(1),
+    start_date=datetime(2021, 1, 1),
     schedule_interval=None,
     catchup=False,
     tags=['transferencia', cliente],

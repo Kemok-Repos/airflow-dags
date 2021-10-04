@@ -3,7 +3,7 @@ from airflow.models import Variable
 from airflow.operators.dummy import DummyOperator
 from airflow.providers.telegram.operators.telegram import TelegramOperator
 from kemokrw.load_db import LoadDB
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, insert, text
 from sqlalchemy.exc import OperationalError, DatabaseError
 from os import listdir, getcwd
 import json
@@ -132,17 +132,19 @@ def insert_error_to_log(context):
 
 def check_slow_queries():
     connection_list = ["aquasistemas_postgres", "bac_personas_postgres", "bago_caricam_postgres", "bago_guatemala_postgres", "kemok_bi_postgres", "sr_tendero_postgres"]
+    keys = ['pid', 'database', 'username', 'ip', 'start', 'stop', 'query_detail', 'properties']
     for conn_id in connection_list:
-        result = run_query_from_file(conn_id, PATH+'sql/_slow_queries.sql')
-        pid_list = []
-        for slow_query in result:
-            pid_list.append(slow_query[0])
-        for pid in pid_list:
-            print('Eliminar proceso '+str(pid))
-            cancel = run_query(conn_id, "SELECT pg_cancel_backend('{0}')".format(str(pid)))
-            for i in cancel:
-                print(i[0])
-
+        result = get_query_from_file(conn_id, '/opt/airflow/dags/sql/_slow_queries.sql', keys)
+        for i in result:
+            print('Eliminar proceso '+str(i['pid']))
+            cancel = run_query(conn_id, "SELECT pg_cancel_backend('{0}')".format(str(i['pid'])))
+            if cancel:
+                for j in cancel:
+                    print(j[0])
+            insert = i 
+            insert['properties'] = json.dumps(insert['properties']) or ''
+            insert['query_detail'] = insert['query_detail'].replace("'", "''")
+            run_query_from_file('kat_postgres', '/opt/airflow/dags/sql/_insert_timeout_processes.sql', **insert)
 
 def join_dicts(a, b):
     if not isinstance(a, dict):

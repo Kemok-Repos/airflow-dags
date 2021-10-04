@@ -1,6 +1,5 @@
 from airflow import DAG
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 from core_initialize import dag_init
 from core_transfer import TransferTasks
 from core_processing import build_processing_tasks
@@ -19,10 +18,10 @@ default_args = {
     'sla': timedelta(minutes=120)
 }
 with DAG(
-    dag_id='extraccion_completa_'+cliente.replace(' ', '_'),
+    dag_id=cliente.replace(' ', '-')+'-extraccion-y-procesamiento-completo-para-actualizacion-de-tableros',
     description="Extraer información y procesarla",
     default_args=default_args,
-    start_date=days_ago(1),
+    start_date=datetime(2021, 1, 1),
     schedule_interval='0 6 * * *',
     max_active_runs=1,
     catchup=False,

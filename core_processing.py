@@ -1,3 +1,4 @@
+from airflow.operators.dummy import DummyOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.utils.task_group import TaskGroup
 from utils import get_task_name, insert_error_to_log
@@ -15,6 +16,10 @@ def build_processing_tasks(connection_id=None, repo=None, client=None):
     processing_task_groups.sort()
 
     tg = []
+    with TaskGroup(group_id='Inicio_de_procesamiento') as grupo_inicio:
+        tinicial = DummyOperator(task_id='Inicio_de_procesamiento', trigger_rule='all_done')
+    tg.append(grupo_inicio)
+
     for i, group in enumerate(processing_task_groups):
         with TaskGroup(group_id='Procesar_' + get_task_name(group)) as task_group:
             t = []
@@ -33,5 +38,7 @@ def build_processing_tasks(connection_id=None, repo=None, client=None):
                     t[j - 1] >> t[j]
         tg.append(task_group)
         if i != 0:
-            tg[i - 1] >> tg[i]
+            tg[i] >> tg[i + 1]
+        else:
+            tg[0] >> tg[1]
     return tg

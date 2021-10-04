@@ -45,7 +45,7 @@ def dag_finale(conn_id=None, client=None, **kwargs):
             tasks = [PostgresOperator(
                 task_id='Liberando_recursos',
                 postgres_conn_id=conn_id,
-                trigger_rule='none_skipped',
+                trigger_rule='all_done',
                 sql='UPDATE dag_run SET available = True;'
             )]
             for i, j in enumerate(tasks):

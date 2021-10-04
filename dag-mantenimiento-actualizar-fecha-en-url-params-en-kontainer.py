@@ -1,7 +1,6 @@
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 default_args = {
     'owner': 'airflow',
@@ -15,10 +14,10 @@ default_args = {
 }
 
 with DAG(
-        dag_id="kontainer_actualizar_url_params",
+        dag_id="mantenimiento-actualizar-fecha-en-url-params-en-kontainer",
         description="Actualiza los filtros de los tableros para que vean el mes actual",
         default_args=default_args,
-        start_date=days_ago(32),
+        start_date=datetime(2021, 1, 1),
         schedule_interval="0 13 1 * *",
         catchup=False,
         tags=['herramienta', 'kontainer'],

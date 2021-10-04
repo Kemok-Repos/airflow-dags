@@ -1,6 +1,5 @@
 from airflow import DAG
-from airflow.utils.dates import days_ago
-from datetime import timedelta
+from datetime import timedelta, datetime
 from airflow.operators.python import PythonOperator
 from core_notifications import NotificationTasks
 from core_transfer import TransferTasks
@@ -12,6 +11,7 @@ n3 = NotificationTasks(client='bago guatemala')
 n4 = NotificationTasks(client='bago caricam')
 n5 = NotificationTasks(client='kemok bi')
 n6 = NotificationTasks(client='sr tendero')
+n7 = NotificationTasks(client='kat')
 
 t1 = TransferTasks(client='aquasistemas')
 t2 = TransferTasks(client='bac personas')
@@ -28,10 +28,10 @@ default_args = {
 }
 
 with DAG(
-    dag_id='Refrescar_configuración',
+    dag_id='mantenimiento-actualizar-configuracion-de-transferencias-y-notificaciones',
     description="Refrescar configuración de notificaciones y transferencias",
     default_args=default_args,
-    start_date=days_ago(1),
+    start_date=datetime(2021, 1, 1),
     schedule_interval='0 5 * * *',
     max_active_runs=1,
     catchup=False,
@@ -60,6 +60,10 @@ with DAG(
     tn6 = PythonOperator(
         task_id='Refrescar_notificaciones_sr_tendero',
         python_callable=n6.get_notification_tasks,
+    )
+    tn7 = PythonOperator(
+        task_id='Refrescar_notificaciones_kat',
+        python_callable=n7.get_notification_tasks,
     )
     tt1 = PythonOperator(
         task_id='Refrescar_transferencias_aquasistemas',
