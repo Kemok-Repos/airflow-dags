@@ -1,6 +1,7 @@
 credentials/*
-config/*
 !credentials/.gitkeep 
+config/*
+!config/.gitkeep 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
