@@ -45,7 +45,8 @@ with DAG(
 
     t4 = TriggerDagRunOperator( 
         task_id='Iniciar_procesamiento',
-        trigger_dag_id='bac-personas-procesamiento-completo-para-actualizacion-de-tableros'
+        trigger_dag_id='bac-personas-procesamiento-completo-para-actualizacion-de-tableros',
+        wait_for_completion=True
     )
 
     t5 = BranchSQLOperator(
@@ -58,7 +59,8 @@ with DAG(
 
     t6 = TriggerDagRunOperator( 
         task_id='Reiniciar_procesamiento',
-        trigger_dag_id='bac-personas-procesamiento-completo-para-actualizacion-de-tableros'
+        trigger_dag_id='bac-personas-procesamiento-completo-para-actualizacion-de-tableros',
+        wait_for_completion=True
     )
 
     t7 = BranchSQLOperator(
