@@ -13,10 +13,9 @@ PATH = getcwd() + '/dags/'
 def get_current_errors(conn_id='airflow_postgres', path=PATH + '/sql/_errors_in_current_dag_run.sql', **kwargs):
     """ Función que retorna la cantidad de errores en corrida actual """
     dag_object = kwargs.get('dag')
-    execution_date = kwargs.get('execution_date')
-    execution_date = execution_date.strftime('%Y-%m-%d %H:%M:%S.%f+00')
+    run_id = kwargs.get('run_id')
     dag_runs_query = get_query_from_file(conn_id, path, ['conteo'],
-                                         **{'dag_id': dag_object.dag_id, 'execution_date': execution_date})
+                                         **{'dag_id': dag_object.dag_id, 'run_id': run_id})
     print(dag_runs_query[0])
     if dag_runs_query[0]['conteo'] == 0:
         return 'Fin.Finalizar_proceso'

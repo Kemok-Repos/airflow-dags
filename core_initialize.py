@@ -10,7 +10,7 @@ from os import getcwd
 PATH = getcwd() + '/dags/'
 
 
-def get_current_runs(conn_id='airflow_postgres', path=PATH + '/sql/current_dag_runs.sql', **kwargs):
+def get_current_runs(conn_id='airflow_postgres', path=PATH + '/sql/_current_dag_runs.sql', **kwargs):
     """ Función que retorna descarta nuevas corridas de Airflow en base a la cantidad de corridas actuales. """
     dag_object = kwargs.get('dag')
     dag_runs_query = get_query_from_file(conn_id, path, ['conteo'], **{'dag_id': dag_object.dag_id})
