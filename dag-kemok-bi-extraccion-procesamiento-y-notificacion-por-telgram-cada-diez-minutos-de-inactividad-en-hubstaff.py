@@ -3,6 +3,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.dummy import DummyOperator
 from datetime import timedelta, datetime
 from core_transfer import TransferTasks
+from core_processing import build_processing_tasks
 from core_notifications import NotificationTasks
 
 cliente = 'kemok bi'
@@ -36,14 +37,17 @@ with DAG(
             postgres_conn_id=conn_id,
             sql="REFRESH MATERIALIZED VIEW vista_inactividad_reciente WITH DATA;",
         )
+    t3 = build_processing_tasks(connection_id=cliente.replace(' ', '_')+'_postgres', repo='kemok-sql/daily_sql/')
+
     nt1 = NotificationTasks(client=cliente)
 
-    t3 = nt1.branch(5)
-    t4 = nt1.tasks(5)
+    t4 = nt1.branch(5)
+    t5 = nt1.tasks(5)
 
     nt2 = NotificationTasks(client=cliente)
 
-    t5 = nt2.branch(6, trigger_rule='one_success')
-    t6 = nt2.tasks(6)
+    t6 = nt2.branch(6, trigger_rule='one_success')
+    t7 = nt2.tasks(6)
 
-    t1 >> t2 >> t3 >> t4 >> t5 >> t6
+    t1 >> t2 >> t3[0] 
+    t3[-1] >> t4 >> t5 >> t6 >> t7
