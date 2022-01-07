@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.providers.ssh.operators.ssh import SSHOperator
 from datetime import timedelta, datetime
 from core_initialize import dag_init
 from core_processing import build_processing_tasks
@@ -17,7 +18,7 @@ default_args = {
     'sla': timedelta(minutes=120)
 }
 with DAG(
-    dag_id="transformacion-sr-tendero",
+    dag_id="sr-tendero-procesamiento-completo-para-actualizacion-de-tableros",
     description="Transforma la informacion cruda para el uso de las aplicaciones",
     default_args=default_args,
     start_date=datetime(2021, 1, 1),
@@ -28,7 +29,14 @@ with DAG(
 ) as dag:
 
     t1 = dag_init(client=cliente)
-    t2 = build_processing_tasks(client=cliente)
-    t3 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
-    t1 >> t2[0] 
-    t2[-1] >> t3
+    t2 = SSHOperator(
+        task_id='correr-script-de-verificacion',
+        command='cd /root/ktranfercheck  &&  /root/ktranfercheck/venv/bin/python /root/ktranfercheck/main.py >> /var/log/ktranfercheck.log',
+        ssh_conn_id=cliente.replace(' ', '_')+'_server',
+        conn_timeout=None,
+        cmd_timeout=36000
+    )    
+    t5 = build_processing_tasks(client=cliente)
+    t6 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
+    t1 >> t2 >> t5[0] 
+    t5[-1] >> t6
