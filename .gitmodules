@@ -19,3 +19,6 @@
 [submodule "kemok-sql"]
 	path = kemok-sql
 	url = git@github.com:Kemok-Repos/kemok-sql.git
+[submodule "senz-sql"]
+	path = senz-sql
+	url = git@github.com:Kemok-Repos/senz-transformation.git
