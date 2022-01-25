@@ -23,8 +23,15 @@ with DAG(
         tags=['herramienta', 'kontainer'],
 
 ) as dag:
-    find_extraction_date = PostgresOperator(
-        task_id="actualizar_url_params",
+    t1 = PostgresOperator(
+        task_id="Actualizar_fecha_en_url_params",
         postgres_conn_id='kontainer_postgres',
-        sql='sql/refresh-url-params.sql'
+        sql='sql/mantenimiento-actualizar-fecha-en-url-params-en-kontainer--actualizar-fecha.sql'
     )
+    t2 = PostgresOperator(
+        task_id="Agregar_fecha_default_en_url_params",
+        postgres_conn_id='kontainer_postgres',
+        sql='sql/mantenimiento-actualizar-fecha-en-url-params-en-kontainer--colocar-fecha-default.sql'
+    )
+
+    t1 >> t2

@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 from core_initialize import dag_init
 from core_processing import build_processing_tasks
 from core_finale import dag_finale
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 cliente = 'aquasistemas'
 
@@ -29,6 +30,12 @@ with DAG(
 
     t1 = dag_init(client=cliente)
     t2 = build_processing_tasks(client=cliente)
-    t3 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
+    t3 = PostgresOperator(
+        task_id="Brindar_accesos_a_clientes_nuevos_a_kontainer",
+        postgres_conn_id='kontainer_postgres',
+        sql='SELECT update_accesos_aquasistemas();'
+    )
+    t4 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
     t1 >> t2[0] 
     t2[-1] >> t3
+    t3 >> t4

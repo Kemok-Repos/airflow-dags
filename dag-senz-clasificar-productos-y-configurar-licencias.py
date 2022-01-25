@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.providers.ssh.operators.ssh import SSHOperator
+from core_transfer import TransferTasks
 from datetime import datetime, timedelta
 
 default_args = {
@@ -24,7 +25,11 @@ with DAG(
     tags=['senz', 'ssh'],
 ) as dag:
 
-    t1 = SSHOperator(
+    t1 = TransferTasks(client='senz gt', condition='test').task_groups()
+
+    t2 = TransferTasks(client='senz pa', condition='test').task_groups()
+
+    t3 = SSHOperator(
         task_id='clasificar-productos-y-configurar-licencias',
         command='cd /opt/productos-guatecompras/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -32,8 +37,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-
-    t2 = SSHOperator(
+    t4 = SSHOperator(
         task_id='aplicar-cambios-en-metabase',
         command='cd /opt/metamanager/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -41,7 +45,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t3 = SSHOperator(
+    t5 = SSHOperator(
         task_id='eliminar-licencias',
         command='cd /opt/productos-guatecompras/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -49,4 +53,6 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t1 >> t2 >> t3
+    t1 >> t3
+    t2 >> t3
+    t3 >> t4 >> t5

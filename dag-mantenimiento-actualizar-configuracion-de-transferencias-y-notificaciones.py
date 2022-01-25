@@ -19,6 +19,7 @@ t3 = TransferTasks(client='bago guatemala')
 t4 = TransferTasks(client='bago caricam')
 t5 = TransferTasks(client='kemok bi')
 t6 = TransferTasks(client='sr tendero')
+t7 = TransferTasks(client='senz pa')
 
 default_args = {
     'owner': 'airflow',
@@ -88,4 +89,12 @@ with DAG(
     tt6 = PythonOperator(
         task_id='Refrescar_transferencias_sr_tendero',
         python_callable=t6.get_transfer_tasks,
+    )
+    tt7 = PythonOperator(
+        task_id='Refrescar_transferencias_senz_pa',
+        python_callable=t7.get_transfer_tasks,
+    )
+    tt8 = PythonOperator(
+        task_id='Refrescar_transferencias_senz_gt',
+        python_callable=t7.get_transfer_tasks,
     )

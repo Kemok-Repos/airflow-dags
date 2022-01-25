@@ -20,7 +20,7 @@ class TransferTasks:
         self.condition = condition or 'test'
         self.configuration_path='/opt/airflow/dags/config/transfers_{0}.json'.format(client)
         self.query_path='/opt/airflow/dags/sql/_transfers.sql'
-
+        self.client = client
         if not path.exists(self.configuration_path):
             self.get_transfer_tasks()
 
@@ -34,7 +34,7 @@ class TransferTasks:
 
             # Nombre de grupo de tareas
             taskgroup_name = get_task_name(task['nombre_fuente'])
-            task['taskgroup_name'] = taskgroup_name
+            task['taskgroup_name'] = taskgroup_name+'_de_'+self.client.replace(' ', '_').lower()
 
             tasks.append(task)
         with open(self.configuration_path, 'w', encoding='utf-8') as file:
@@ -88,8 +88,8 @@ class TransferTasks:
                         ))
             tg.append(task_group)
         if len(tg) == 0:
-            with TaskGroup(group_id='Extraer_informacion') as task_group:
-                t = DummyOperator(task_id='Sin_fuentes_a_transferir')
+            with TaskGroup(group_id='Extraer_informacion'+'_de_'+self.client.replace(' ', '_').lower()) as task_group:
+                t = DummyOperator(task_id='Sin_fuentes_a_transferir'+'_a_'+self.client.replace(' ', '_').lower())
             tg.append(task_group)
             
         return tg
