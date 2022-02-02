@@ -32,7 +32,7 @@ with DAG(
 
     t1 = BranchSQLOperator(
         task_id='Revision-de-datos',
-        sql=PATH+"bago-caricam-sql/tests/data.sql",
+        sql="SELECT True;",
         follow_task_ids_if_true='Transferir-datos-desde-bi-hacia-app',
         follow_task_ids_if_false='Data-no-lista',
         conn_id='bago_caricam_app'
