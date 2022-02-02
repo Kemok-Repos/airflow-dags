@@ -3,7 +3,11 @@ from airflow.operators.sql import BranchSQLOperator
 from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperator
 from airflow.providers.airbyte.sensors.airbyte import AirbyteJobSensor
 from airflow.operators.dummy import DummyOperator
+from core_processing import build_processing_tasks
 from datetime import datetime, timedelta
+from os import getcwd
+
+PATH = getcwd() + '/dags/'
 
 default_args = {
     'owner': 'airflow',
@@ -28,14 +32,14 @@ with DAG(
 
     t1 = BranchSQLOperator(
         task_id='Revision-de-datos',
-        sql="SELECT True;",
-        follow_task_ids_if_true='Transferir-datos-desde-bago-carica-bi-hacia-app',
+        sql=PATH+"bago-caricam-sql/tests/data.sql",
+        follow_task_ids_if_true='Transferir-datos-desde-bi-hacia-app',
         follow_task_ids_if_false='Data-no-lista',
         conn_id='bago_caricam_app'
     )
     t2 = AirbyteTriggerSyncOperator(
         airbyte_conn_id='airbyte_api',
-        task_id='Transferir-datos-desde-bago-carica-bi-hacia-app',
+        task_id='Transferir-datos-desde-bi-hacia-app',
         connection_id='8ba4b7bd-4017-47c8-b3b2-5d8964f8910f',
         asynchronous=True,
     )
@@ -46,7 +50,10 @@ with DAG(
         airbyte_job_id=t2.output,
     )
 
+    t4 = build_processing_tasks(connection_id='bago_caricam_app', repo='bago-caricam-sql/actualizar-tablas-en-app')
+
     t0 = DummyOperator(task_id='Data-no-lista')
 
     t1 >> t2 
     t1 >> t0
+    t3 >> t4[0]
