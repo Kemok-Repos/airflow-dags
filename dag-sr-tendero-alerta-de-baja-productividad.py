@@ -18,7 +18,7 @@ with DAG(
     dag_id=cliente.replace(' ', '-')+'-alerta-de-baja-productividad',
     description="Envio de alerta de baja productividad.",
     default_args=default_args,
-    schedule_interval='5 14 * * 1-5',
+    schedule_interval='5 20 * * 1-5',
     start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
