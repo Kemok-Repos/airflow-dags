@@ -18,7 +18,7 @@ with DAG(
     dag_id=cliente.replace(' ', '-')+'-alerta-de-inactividad',
     description="Envio de alerta de inactividad de tiendas.",
     default_args=default_args,
-    schedule_interval='5 16,22 * * 1-5',
+    schedule_interval='15 16,22 * * 1-5',
     start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
