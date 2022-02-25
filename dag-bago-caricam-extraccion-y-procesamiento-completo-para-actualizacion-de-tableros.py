@@ -41,11 +41,6 @@ with DAG(
         follow_task_ids_if_false='Data-no-lista',
         conn_id='bago_caricam_postgres'
     )
-    t5 = PostgresOperator (
-        task_id='Activar-ventana-cambio',
-        postgres_conn_id='bago_caricam_app',
-        sql="UPDATE paises SET ventana_abierta = True;"
-    )
     t6 = PostgresOperator (
         task_id='Actualizar-test-fecha',
         postgres_conn_id='bago_caricam_postgres',
@@ -60,5 +55,5 @@ with DAG(
     t9 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
 
     t1 >> t2 >> t3[0] 
-    t3[-1] >> t4 >> t5 >> t6 >> t7 >> t9 
+    t3[-1] >> t4 >> t6 >> t7 >> t9 
     t4 >> t8 >> t9
