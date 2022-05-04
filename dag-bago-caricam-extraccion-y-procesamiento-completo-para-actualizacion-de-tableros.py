@@ -37,7 +37,7 @@ with DAG(
     t4 = BranchSQLOperator(
         task_id='Revision-de-datos',
         sql="SELECT bool_and(resultado) AND date_trunc('month', current_date) NOT IN (SELECT fecha FROM test_fecha) FROM tests;",
-#       follow_task_ids_if_true='Activar-ventana-cambio',
+        follow_task_ids_if_true='Actualizar-test-fecha',
         follow_task_ids_if_false='Data-no-lista',
         conn_id='bago_caricam_postgres'
     )
