@@ -1,3 +1,5 @@
+import os
+from typing import List
 from airflow.hooks.base import BaseHook
 from airflow.models import Variable
 from airflow.operators.dummy import DummyOperator
@@ -50,6 +52,13 @@ def read_file(path, **kwargs):
     with open(path, 'r', encoding='utf-8') as file:
         query = file.read()
         return query.format(**kwargs)
+
+
+def read_text(file_path: [str, List[str]], plain: bool = True):
+    if isinstance(file_path, list):
+        file_path = os.path.join(*file_path)
+    with open(file_path, 'r') as f:
+        return re.sub(r'\s+', ' ', re.sub(r'[\n\t]', ' ', f.read())) if plain else f.read()
 
 
 def run_query(conn_id, query):

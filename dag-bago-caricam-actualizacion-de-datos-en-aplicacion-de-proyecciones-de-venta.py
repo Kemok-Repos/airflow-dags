@@ -32,10 +32,10 @@ with DAG(
 
     t1 = BranchSQLOperator(
         task_id='Revision-de-datos',
-        sql="SELECT True;",
+        sql="SELECT bool_and(resultado) FROM tests;",
         follow_task_ids_if_true='Transferir-datos-desde-bi-hacia-app',
         follow_task_ids_if_false='Data-no-lista',
-        conn_id='bago_caricam_app'
+        conn_id='bago_caricam_postgres'
     )
     t2 = AirbyteTriggerSyncOperator(
         airbyte_conn_id='airbyte_api',
