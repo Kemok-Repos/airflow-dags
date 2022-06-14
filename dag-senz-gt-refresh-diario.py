@@ -17,7 +17,7 @@ default_args = {
     'email_on_retry': False,
     'retries': 0,
     'parallel_tasks': 3,
-    'conn_id': 'senz_gt_postgres',
+    'conn_id': 'senz_gt_mart_postgres',
     'pool': 'Senz Gt',
     'sla': timedelta(hours=1)
 }
