@@ -6,7 +6,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from utils import read_text
 
-DAG_ID = 'senz-guatemala-refresh-diario'
+DAG_ID = 'senz-gt-refresh-diario'
 
 
 default_args = {
