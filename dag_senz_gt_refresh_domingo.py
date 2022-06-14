@@ -17,7 +17,7 @@ default_args = {
     'email_on_retry': False,
     'retries': 0,
     'conn_id': 'senz-gt_postgres',
-    'pool': 'guatecompras',
+    'pool': 'Senz Gt',
     'sla': timedelta(hours=1)
 }
 with DAG(
