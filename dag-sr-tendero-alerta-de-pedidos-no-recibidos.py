@@ -22,7 +22,7 @@ with DAG(
     start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
-    tags=['sr tendero', 'comunicaciÃ³n', 'kontact'],
+    tags=['sr tendero', 'comunicación', 'kontact'],
 ) as dag:
 
     t1 = PostgresOperator (
