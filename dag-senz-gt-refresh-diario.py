@@ -18,7 +18,7 @@ default_args = {
     'retries': 0,
     'parallel_tasks': 3,
     'conn_id': 'senz_gt_mart_postgres',
-    'pool': 'Senz Gt',
+    'pool': 'senz_gt',
     'sla': timedelta(hours=1)
 }
 with DAG(
