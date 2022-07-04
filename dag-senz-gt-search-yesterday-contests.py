@@ -6,7 +6,7 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 
 from utils import read_text
 
-DAG_ID = 'senz-gt-search-today-contests'
+DAG_ID = 'senz-gt-search-yesterday-contests'
 
 
 default_args = {
