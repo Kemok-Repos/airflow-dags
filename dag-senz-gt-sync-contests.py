@@ -17,7 +17,6 @@ default_args = {
     'email_on_retry': False,
     'retries': 0,
     'conn_id': 'senz_gt_server_nano',
-    'pool': 'guatecompras',
     'sla': timedelta(hours=1)
 }
 with DAG(
