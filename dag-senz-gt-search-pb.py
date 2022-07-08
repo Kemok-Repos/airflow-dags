@@ -32,7 +32,7 @@ with DAG(
 ) as dag:
     conn_id = default_args['conn_id']
 
-    cmd = 'cd /opt/guatecompras && python3 search_pb.py -vb'
+    cmd = "cd /opt/guatecompras && python3 search_pb.py -sd  $(date --date='1 day ago' --iso) -ed $(date --iso) -vb"
     t0, tn = DummyOperator(task_id='start'), DummyOperator(task_id='end')
     t1 = SSHOperator(task_id='run', command=cmd, ssh_conn_id=conn_id, conn_timeout=None, cmd_timeout=1800)
 
