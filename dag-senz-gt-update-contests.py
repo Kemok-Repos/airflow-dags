@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy import DummyOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.ssh.operators.ssh import SSHOperator
 
 from utils import read_text
@@ -16,6 +17,7 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
+    'parallel_tasks': 3,
     'conn_id': 'senz_gt_server_nano',
     'sla': timedelta(hours=1)
 }
@@ -30,10 +32,34 @@ with DAG(
     dagrun_timeout=timedelta(minutes=350),
     tags=['senz-gt'],
 ) as dag:
-    conn_id = default_args['conn_id']
+    ssh_id = default_args['conn_id']
+    conn_id = ssh_id.split('_server')[0] + '_postgres'
+    parallel_tasks = default_args['parallel_tasks']
+    st = ['vigente', 'adjudicado', 'prescindido', 'desierto']
+    sql = "select nog from finalizado where estatus = '%s';"
 
-    cmd = 'cd /opt/guatecompras && python3 sync_contests.py -st vigente -vb'
-    t0, tn = DummyOperator(task_id='start'), DummyOperator(task_id='end')
-    t1 = SSHOperator(task_id='run', command=cmd, ssh_conn_id=conn_id, conn_timeout=None, cmd_timeout=None)
 
-    t0 >> t1 >> tn
+    def from_query(cur, sql: str):
+        cur.execute(sql)
+        return cur.fetchall()
+
+
+    def get_data():
+        conn, nogs = PostgresHook(postgres_conn_id=conn_id).get_conn(), []
+        cur, file_path = conn.cursor(), ['dags', 'senz-gt-sql', 'refresh_diario.sql']
+        order_by = 'order by fecha_actualizacion desc'
+        nogs += [x[0] for x in from_query(cur, "select nog from vigente order by fecha_publicacion desc")]
+        # nogs += [x[0] for x in from_query(cur, f"select nog from finalizado where estatus = 'Adjudicado' {order_by}")]
+        # nogs += [x[0] for x in from_query(cur, f"select nog from finalizado where estatus = 'Prescindido' {order_by}")]
+        # nogs += [x[0] for x in from_query(cur, f"select nog from finalizado where estatus = 'Desierto' {order_by}")]
+        _, _, li = cur.close(), conn.close(), list(enumerate(nogs))
+        return {idx: [t[1] for t in li if t[0] % parallel_tasks == idx] for idx in range(parallel_tasks)}
+
+
+    t0, t1, tn = DummyOperator(task_id='start'), DummyOperator(task_id='parallelize'), DummyOperator(task_id='end')
+
+    t0 >> t1
+    for k, v in get_data().items():
+        cmd = 'cd /opt/guatecompras && python3 sync_contests.py -nl %s -vb' % ','.join(v)
+        t1 >> SSHOperator(task_id=f'run{k}', command=cmd, ssh_conn_id=ssh_id, conn_timeout=None, cmd_timeout=None) >> tn
+
