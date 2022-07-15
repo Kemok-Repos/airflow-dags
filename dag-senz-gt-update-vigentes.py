@@ -7,7 +7,7 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 
 from utils import read_text
 
-DAG_ID = 'senz-gt-update-contests'
+DAG_ID = 'senz-gt-update-vigentes'
 
 
 default_args = {
@@ -17,7 +17,7 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
-    'parallel_tasks': 3,
+    'parallel_tasks': 1,
     'conn_id': 'senz_gt_server_nano',
     'sla': timedelta(hours=1)
 }
@@ -45,13 +45,9 @@ with DAG(
 
 
     def get_data():
-        conn, nogs = PostgresHook(postgres_conn_id=conn_id).get_conn(), []
+        conn = PostgresHook(postgres_conn_id=conn_id).get_conn()
         cur, file_path = conn.cursor(), ['dags', 'senz-gt-sql', 'refresh_diario.sql']
-        order_by = 'order by fecha_actualizacion desc'
-        nogs += [x[0] for x in from_query(cur, "select nog from vigente order by fecha_publicacion desc")]
-        # nogs += [x[0] for x in from_query(cur, f"select nog from finalizado where estatus = 'Adjudicado' {order_by}")]
-        # nogs += [x[0] for x in from_query(cur, f"select nog from finalizado where estatus = 'Prescindido' {order_by}")]
-        # nogs += [x[0] for x in from_query(cur, f"select nog from finalizado where estatus = 'Desierto' {order_by}")]
+        nogs = [x[0] for x in from_query(cur, "select nog from vigente order by fecha_publicacion desc")]
         _, _, li = cur.close(), conn.close(), list(enumerate(nogs))
         return {idx: [t[1] for t in li if t[0] % parallel_tasks == idx] for idx in range(parallel_tasks)}
 
