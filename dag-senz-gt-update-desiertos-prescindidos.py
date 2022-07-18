@@ -58,6 +58,6 @@ with DAG(
 
     t0 >> t1
     for k, v in get_data().items():
-        cmd = 'cd /opt/guatecompras && python3 sync_contests.py -nl %s -vb' % ','.join(v)
+        cmd = 'cd /opt/guatecompras && python3 sync_contests.py -nl %s -vb > log/update_desiertos-prescindidos.$(hostname).$(date +"%Y%m%d.%H%M.%s").log' % ','.join(v)
         t1 >> SSHOperator(task_id=f'run{k}', command=cmd, ssh_conn_id=ssh_id, conn_timeout=None, cmd_timeout=None) >> tn
 
