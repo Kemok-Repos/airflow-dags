@@ -23,7 +23,7 @@ with DAG(
     dag_id=DAG_ID,
     description="",
     default_args=default_args,
-    schedule_interval='0 0 * * *',
+    schedule_interval='0 0-5 * * *',
     start_date=datetime(2022, 1, 1),
     catchup=False,
     max_active_runs=1,
@@ -32,7 +32,7 @@ with DAG(
 ) as dag:
     conn_id = default_args['conn_id']
     sd, ed = (date.today() - timedelta(days=1)).isoformat(), date.today().isoformat()
-    cmd = f'cd /opt/guatecompras && python3 search_contests.py -sd {sd} -ed  {ed} -vb'
+    cmd = f'cd /opt/guatecompras && python3 search_contests.py -sd {sd} -ed {ed} -vb'
     t0, tn = DummyOperator(task_id='start'), DummyOperator(task_id='end')
     t1 = SSHOperator(task_id='run', command=cmd, ssh_conn_id=conn_id, conn_timeout=None, cmd_timeout=1800)
 
