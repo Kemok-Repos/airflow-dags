@@ -23,7 +23,7 @@ with DAG(
     dag_id=DAG_ID,
     description="",
     default_args=default_args,
-    schedule_interval='0 6-23 * * *',
+    schedule_interval='*/20 6-23 * * *',
     start_date=datetime(2022, 1, 1),
     catchup=False,
     max_active_runs=1,
