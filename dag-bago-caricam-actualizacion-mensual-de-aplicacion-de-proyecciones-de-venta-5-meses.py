@@ -24,5 +24,5 @@ with DAG(
     tags=['bago caricam', 'transformacion'],
 ) as dag:
 
-    t1 = build_processing_tasks(connection_id='bago_caricam_app', repo='bago-caricam-sql/actualizar-mes-en-app-5-meses')
+    t1 = build_processing_tasks(connection_id='bago_caricam_app_dev', repo='bago-caricam-sql/actualizar-mes-en-app-prueba')
 
