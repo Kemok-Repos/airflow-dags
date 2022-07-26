@@ -31,8 +31,8 @@ with DAG(
     tags=['senz-gt'],
 ) as dag:
     conn_id = default_args['conn_id']
-    sd, ed = (date.today() - timedelta(days=1)).isoformat(), date.today().isoformat()
-    cmd = f'cd /opt/guatecompras && python3 search_contests.py -sd {sd} -ed {ed} -vb'
+    sd = (date.today() - timedelta(days=1)).isoformat()
+    cmd = f'cd /opt/guatecompras && python3 search_contests.py -sd {sd} -md auto -vb'
     t0, tn = DummyOperator(task_id='start'), DummyOperator(task_id='end')
     t1 = SSHOperator(task_id='run', command=cmd, ssh_conn_id=conn_id, conn_timeout=None, cmd_timeout=1800)
 

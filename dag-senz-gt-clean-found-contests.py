@@ -6,7 +6,7 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 
 from utils import read_text
 
-DAG_ID = 'senz-gt-search-pb'
+DAG_ID = 'senz-gt-clean-found-contests'
 
 
 default_args = {
@@ -23,7 +23,7 @@ with DAG(
     dag_id=DAG_ID,
     description="",
     default_args=default_args,
-    schedule_interval='0 5 * * *',
+    schedule_interval='0 6 * * *',
     start_date=datetime(2022, 1, 1),
     catchup=False,
     max_active_runs=1,
@@ -32,7 +32,7 @@ with DAG(
 ) as dag:
     conn_id = default_args['conn_id']
 
-    cmd = "cd /opt/guatecompras && python3 search_pb.py -sd  $(date --date='yesterday' --iso) -md auto -vb"
+    cmd = "cd /opt/guatecompras && python3 clean_found_contests.py -vb"
     t0, tn = DummyOperator(task_id='start'), DummyOperator(task_id='end')
     t1 = SSHOperator(task_id='run', command=cmd, ssh_conn_id=conn_id, conn_timeout=None, cmd_timeout=1800)
 
