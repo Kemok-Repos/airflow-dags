@@ -33,6 +33,8 @@ with DAG(
         task_id='Truncar-tablas-g2s',
         postgres_conn_id='sr_tendero_postgres',
         sql="sr-tendero-sql/g2s_truncate.sql"
+    )
+
     t3 = TransferTasks(client=cliente, condition='preprocessing').task_groups()
     t4 = build_processing_tasks(client=cliente)
     t5 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
