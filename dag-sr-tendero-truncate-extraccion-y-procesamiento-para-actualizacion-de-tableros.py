@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import timedelta, datetime
 from core_initialize import dag_init
 from core_transfer import TransferTasks
