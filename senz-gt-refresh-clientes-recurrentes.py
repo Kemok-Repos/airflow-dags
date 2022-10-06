@@ -56,4 +56,4 @@ with DAG(
         postgres_conn_id='senz_gt_mart_postgres',
         sql='SELECT refresh_seguimiento_concursos_no_ofertados_recurrentes();'
     )
-   t1 >> t2 >> t3 >> t4
+   t1 >> t2 >> t3 >> t4 >> t5
