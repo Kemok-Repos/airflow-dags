@@ -29,7 +29,9 @@ with DAG(
 ) as dag:
 
     t1 = dag_init(client=cliente)   
-    t3 = build_processing_tasks(client=cliente)
-    t4 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
-    t1 >> t2 >> t3 >> t4[0] 
-    t4[-1] >> t5
+    t2 = build_processing_tasks(client=cliente)
+    t3 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
+
+    t1 >> t2[0] 
+    t2[-1] >> t3
+    
