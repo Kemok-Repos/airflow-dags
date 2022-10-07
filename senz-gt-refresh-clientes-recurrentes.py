@@ -1,59 +1,35 @@
 from airflow import DAG
-from core_finale import dag_finale
-from datetime import datetime, timedelta
-from airflow.operators.dummy import DummyOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from utils import read_text
+from datetime import timedelta, datetime
+from core_initialize import dag_init
+from core_transfer import TransferTasks
+from core_processing import build_processing_tasks
+from core_finale import dag_finale
 
-DAG_ID = 'senz-gt-refresh-clientes-recurrentes'
-
+cliente = 'senz gt dbmart'
 
 default_args = {
     'owner': 'airflow',
     'email': ['emilianni@kemok.io'],
-    'email_on_success': False,
+    'email_on_sucess': False,
     'email_on_failure': True,
-    'email_on_retry': True,
-    'retries': 0,
-    'conn_id': 'senz_gt_mart_postgres',  
-    'pool': 'senz_gt', 
+    'email_on_retry': False,
+    'retries': 2,
     'sla': timedelta(minutes=10)
 }
 with DAG(
-    dag_id=DAG_ID,
-    description="",
+    dag_id=cliente.replace(' ', '-')+'-refresh-clientes-recurrentes',
+    description="Ejecuta el refresh diario por tipo de vista tomando en cuenta si hubo acceso del cliente a sus tablero",
     default_args=default_args,
-    schedule_interval='0 23 * * 0',
-    start_date=datetime(2022, 3, 2),
-    catchup=False,
+    start_date=datetime(2022, 10, 7),
+    schedule_interval='0 6 * * *',
     max_active_runs=1,
-    dagrun_timeout=timedelta(minutes=350),
-    tags=['senz-gt'],
+    catchup=False,
+    tags=['transferencia', 'procesamiento', cliente],
 ) as dag:
-    t1 = PostgresOperator (
-        task_id='Refresh vista analisis_precio',
-        postgres_conn_id='senz_gt_mart_postgres',
-        sql='senz-gt-sql/refresh_analisis_precio.sql'
-    )
-    t2 = PostgresOperator (
-        task_id='Refresh vista marketshare',
-        postgres_conn_id='senz_gt_mart_postgres',
-        sql='senz-gt-sql/refresh_marketshare.sql'
-    )
-    t3 = PostgresOperator (
-        task_id='Refresh vista npgs',
-        postgres_conn_id='senz_gt_mart_postgres',
-        sql='senz-gt-sql/refresh_npgs.sql'
-    )
-     t4 = PostgresOperator (
-        task_id='Refresh vista kpis_de_equipo',
-        postgres_conn_id='senz_gt_mart_postgres',
-        sql='senz-gt-sql/refresh_kpis_de_equipo.sql'
-    )
-      t5 = PostgresOperator (
-        task_id='Refresh vista eguimiento_concursos_no_ofertados',
-        postgres_conn_id='senz_gt_mart_postgres',
-        sql='senz-gt-sql/refresh_seguimiento_concursos_no_ofertados.sql'
-    )
-   t1 >> t2 >> t3 >> t4 >> t5
+
+    t1 = dag_init(client=cliente)   
+    t3 = build_processing_tasks(client=cliente)
+    t4 = dag_finale(client=cliente, **{'dag_id': dag.dag_id})
+    t1 >> t2 >> t3 >> t4[0] 
+    t4[-1] >> t5
