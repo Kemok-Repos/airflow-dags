@@ -34,26 +34,26 @@ with DAG(
     t1 = PostgresOperator (
         task_id='Refresh vista analisis_precio',
         postgres_conn_id='senz_gt_mart_postgres',
-        sql='SELECT refresh_analisis_precio_clientes_recurrentes();'
+        sql='senz-gt-sql/refresh_analisis_precio.sql'
     )
     t2 = PostgresOperator (
         task_id='Refresh vista marketshare',
         postgres_conn_id='senz_gt_mart_postgres',
-        sql='SELECT refresh_marketshare_clientes_recurrentes();'
+        sql='senz-gt-sql/refresh_marketshare.sql'
     )
     t3 = PostgresOperator (
         task_id='Refresh vista npgs',
         postgres_conn_id='senz_gt_mart_postgres',
-        sql='SELECT refresh_npgs_clientes_recurrentes();'
+        sql='senz-gt-sql/refresh_npgs.sql'
     )
      t4 = PostgresOperator (
         task_id='Refresh vista kpis_de_equipo',
         postgres_conn_id='senz_gt_mart_postgres',
-        sql='SELECT refresh_kpis_de_equipo_clientes_recurrentes();'
+        sql='senz-gt-sql/refresh_kpis_de_equipo.sql'
     )
       t5 = PostgresOperator (
         task_id='Refresh vista eguimiento_concursos_no_ofertados',
         postgres_conn_id='senz_gt_mart_postgres',
-        sql='SELECT refresh_seguimiento_concursos_no_ofertados_recurrentes();'
+        sql='senz-gt-sql/refresh_seguimiento_concursos_no_ofertados.sql'
     )
    t1 >> t2 >> t3 >> t4 >> t5
