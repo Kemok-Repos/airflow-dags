@@ -25,11 +25,17 @@ with DAG(
     tags=['senz', 'ssh'],
 ) as dag:
 
-    t1 = TransferTasks(client='senz gt', condition='test').task_groups()
+    t1 = PostgresOperator (
+        task_id='Truncar-tabla-g2s',
+        postgres_conn_id='senz_gt_postgres',
+        sql="senz-gt-replica-sql/truncate_g2s_asignacion_npgs.sql"
+    )
 
-    t2 = TransferTasks(client='senz pa', condition='test').task_groups()
+    t2 = TransferTasks(client='senz gt', condition='test').task_groups()
 
-    t3 = SSHOperator(
+    t3 = TransferTasks(client='senz pa', condition='test').task_groups()
+
+    t4 = SSHOperator(
         task_id='clasificar-productos-y-configurar-licencias',
         command='cd /opt/productos-guatecompras-senz-gt/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -37,7 +43,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t4 = SSHOperator(
+    t5 = SSHOperator(
         task_id='aplicar-cambios-en-metabase',
         command='cd /opt/metamanager/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -45,7 +51,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t5 = SSHOperator(
+    t6 = SSHOperator(
         task_id='eliminar-licencias',
         command='cd /opt/productos-guatecompras-senz-gt/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -53,6 +59,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t1 >> t3
-    t2 >> t3
-    t3 >> t4 >> t5
+    t1
+    t2 >> t4
+    t3 >> t4
+    t4 >> t5 >> t6
