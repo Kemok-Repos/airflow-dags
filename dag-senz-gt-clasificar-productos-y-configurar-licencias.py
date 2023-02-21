@@ -60,7 +60,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t1
+    t1 >> t2
     t2 >> t4
     t3 >> t4
     t4 >> t5 >> t6
