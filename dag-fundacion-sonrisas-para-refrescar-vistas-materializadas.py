@@ -18,7 +18,7 @@ default_args = {
     'sla': timedelta(minutes=120)
 }
 with DAG(
-    dag_id=cliente.replace(' ', '-')+'-refrescar-vistas-materializadas',
+    dag_id=cliente.replace(' ', '-')+'-para-refrescar-vistas-materializadas',
     description="Refrescar vistas materializadas",
     default_args=default_args,
     start_date=datetime(2021, 1, 1),
