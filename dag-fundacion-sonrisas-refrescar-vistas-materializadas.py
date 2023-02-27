@@ -5,7 +5,7 @@ from core_transfer import TransferTasks
 from core_processing import build_processing_tasks
 from core_finale import dag_finale
 
-cliente = 'Fundacion Sonrisas'
+cliente = 'fundacion sonrisas'
 
 default_args = {
     'owner': 'airflow',
@@ -18,7 +18,7 @@ default_args = {
     'sla': timedelta(minutes=120)
 }
 with DAG(
-    dag_id=cliente.replace(' ', '-')+'-refrescar vistas materializadas',
+    dag_id=cliente.replace(' ', '-')+'-refrescar-vistas-materializadas',
     description="Refrescar vistas materializadas",
     default_args=default_args,
     start_date=datetime(2021, 1, 1),
