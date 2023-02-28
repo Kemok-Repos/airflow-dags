@@ -13,10 +13,10 @@ default_args = {
     'sla': timedelta(minutes=120)
 }
 with DAG(
-    dag_id='sr-tendero-metricas-diarias-tiendas-pos',
+    dag_id='sr-tendero-extraccion-cada-media-hora-tiendas-pos',
     description="Extracción desde Tendero_Pos as SrTendero cada media hora",
     default_args=default_args,
-    schedule_interval='5 0 1 * *',
+    schedule_interval='*/25 * * * *',
     start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
