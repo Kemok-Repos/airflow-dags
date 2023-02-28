@@ -16,7 +16,7 @@ with DAG(
     dag_id='sr-tendero-extraccion-cada-media-hora-tiendas-pos',
     description="Extracción desde Tendero_Pos as SrTendero cada media hora",
     default_args=default_args,
-    schedule_interval='*/25 * * * *',
+    schedule_interval='0,25 13-23,0-5 * * *',
     start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
