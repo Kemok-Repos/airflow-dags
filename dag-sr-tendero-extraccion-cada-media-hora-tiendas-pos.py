@@ -1,5 +1,5 @@
 from airflow import DAG
-from core_processing import build_processing_tasks
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from datetime import datetime, timedelta
 from os import getcwd
 
@@ -23,6 +23,11 @@ with DAG(
     dagrun_timeout=timedelta(minutes=350),
     tags=['sr tendero'],
 ) as dag:
-
-    t1 = build_processing_tasks(connection_id='sr_tendero_postgres', repo='sr-tendero-sql/metricas_diarias-tiendas-pos')
+    t1 = PostgresOperator (
+        task_id='extraer-metricas-diarias-tiendas-pos',
+        postgres_conn_id='sr_tendero_postgres',
+        sql="sr-tendero-sql/metricas_diarias-tiendas-pos.sql"
+    )
+    
+    t1 
 
