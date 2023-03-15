@@ -21,8 +21,7 @@ default_args = {
 with DAG(
     dag_id='bago-caricam-respaldo-tablas-proyecciones-y-presentaciones',
     description="Respalda dos tablas de la app proyecciones",
-    default_args=default_args,
-    schedule_interval=None,
+    default_args=default_args,    
     schedule_interval='0 9 30 * *',
     start_date=datetime(2021, 1, 1),
     catchup=False,
