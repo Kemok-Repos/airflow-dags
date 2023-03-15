@@ -30,6 +30,6 @@ with DAG(
     tags=['bago caricam', 'airbyte'],
 ) as dag:
 
-    t1 = build_processing_tasks(connection_id='bago_caricam_app', repo='bago_caricam_sql/respaldo-tablas-app-proyecciones')                                                                       
+    t1 = build_processing_tasks(connection_id='bago_caricam_app', repo='bago-caricam-sql/respaldo-tablas-app-proyecciones')                                                                       
 
     t1 
