@@ -24,5 +24,5 @@ with DAG(
     tags=['bago guatemala', 'transformacion'],
 ) as dag:
 
-    t1 = build_processing_tasks(connection_id='bago_guatemala_postgres', repo='bago_guatemala_sql/cedula-de-costeos')
+    t1 = build_processing_tasks(connection_id='bago_guatemala_postgres', repo='bago-guatemala-sql/cedula-de-costeos')
 
