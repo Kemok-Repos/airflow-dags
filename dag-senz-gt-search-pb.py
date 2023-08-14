@@ -6,7 +6,7 @@ from airflow.providers.ssh.operators.ssh import SSHOperator
 
 from utils import read_text
 
-DAG_ID = 'senz-gt-search-today-pb'
+DAG_ID = 'senz-gt-search-pb'
 
 
 default_args = {
@@ -23,7 +23,7 @@ with DAG(
     dag_id=DAG_ID,
     description="",
     default_args=default_args,
-    schedule_interval='45 8-23 * * *',
+    schedule_interval='0 12,17 * * *',
     start_date=datetime(2022, 1, 1),
     catchup=False,
     max_active_runs=1,
