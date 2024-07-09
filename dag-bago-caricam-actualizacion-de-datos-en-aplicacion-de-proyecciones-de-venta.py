@@ -40,7 +40,7 @@ with DAG(
     t2 = AirbyteTriggerSyncOperator(
         airbyte_conn_id='airbyte_api',
         task_id='Transferir-datos-desde-bi-hacia-app',
-        connection_id='8ba4b7bd-4017-47c8-b3b2-5d8964f8910f',
+        connection_id='b31f8d1c-a863-4d9c-a02e-69ca45180e7a',
         asynchronous=True,
     )
 
