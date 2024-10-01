@@ -35,9 +35,7 @@ with DAG(
 
     t2 = TransferTasks(client='senz gt', condition='test').task_groups()
 
-    t3 = TransferTasks(client='senz pa', condition='test').task_groups()
-
-    t4 = SSHOperator(
+    t3 = SSHOperator(
         task_id='clasificar-productos-y-configurar-licencias',
         command='cd /opt/productos-guatecompras-senz-gt-2023/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -45,7 +43,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t5 = SSHOperator(
+    t4 = SSHOperator(
         task_id='aplicar-cambios-en-metabase',
         command='cd /opt/replicador.kemok.app ; source .env/bin/activate ; python main.py ; deactivate ; ',
         ssh_conn_id='elt_server',
@@ -53,7 +51,7 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t6 = SSHOperator(
+    t5 = SSHOperator(
         task_id='eliminar-licencias',
         command='cd /opt/productos-guatecompras-senz-gt-2023/ ; python main.py',
         ssh_conn_id='elt_server',
@@ -61,7 +59,4 @@ with DAG(
         cmd_timeout=36000
     )
 
-    t1 >> t2
-    t2 >> t4
-    t3 >> t4
-    t4 >> t5 >> t6
+    t1 >> t2 >> t3 >> t4 >> t5
