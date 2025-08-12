@@ -16,8 +16,7 @@ with DAG(
     dag_id='dag-bago-guatemala-actualizar-maestros-cupones-dev',
     description="Actualizar tablas maestro en la base de datos de cupones DEV",
     default_args=default_args,
-    schedule_interval='5 0 1 * *',
-    schedule_interval='0 13,19,1 * * *'
+    schedule_interval='0 13,19,1 * * *',
     start_date=datetime(2021, 1, 1),
     catchup=False,
     max_active_runs=1,
